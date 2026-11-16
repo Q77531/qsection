@@ -27,7 +27,7 @@ LICENSE       MIT（仅覆盖本仓库自有代码与模板）
 - 批量导出图文时建议：视口 1080×1440、`deviceScaleFactor=1`，等字体与图片加载完成后再截图，单张区域截取（不要整页截图后裁切）。
 
 - `assets/cover-01.png` is a finished 1080×1440 cover, ready for social posts.
-- Templates under `templates/` are plain Markdown; copy them into your own vault and replace the placeholders.
+- Templates under `templates/` are standalone HTML; open one in a browser, edit the text, and export each slide as described above.
 - For batch export: use a 1080×1440 viewport with `deviceScaleFactor=1`, wait for fonts and images, and screenshot each slide element rather than cropping a full-page capture.
 
 ## 来源与边界 / Scope
