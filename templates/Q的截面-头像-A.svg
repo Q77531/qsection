@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Q的截面 头像 A 年轮 Q">
+  <rect width="1024" height="1024" fill="#111318"/>
+  <circle cx="512" cy="512" r="360" fill="#111318" stroke="#F2EFE8" stroke-width="10"/>
+  <g fill="none" stroke="#F2EFE8" stroke-linecap="round">
+    <path d="M 512 302 A 210 210 0 1 1 512 722" stroke-width="10" opacity="0.95"/>
+    <path d="M 512 352 A 160 160 0 1 1 512 672" stroke-width="8" opacity="0.75"/>
+    <path d="M 512 402 A 110 110 0 1 1 512 622" stroke-width="6" opacity="0.55"/>
+  </g>
+  <path d="M 700 700 L 840 840" stroke="#F2EFE8" stroke-width="34" stroke-linecap="round"/>
+  <path d="M 196 760 L 828 256" stroke="#5AC8FA" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="512" cy="512" r="24" fill="#FF6B35"/>
+</svg>

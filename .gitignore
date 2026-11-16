@@ -1,0 +1,21 @@
+# Obsidian
+.obsidian/
+.trash/
+
+# Personal notes and vault data
+*.private.md
+personal/
+
+# Secrets
+.env
+.env.*
+**/secrets.*
+*token*
+*apikey*
+*API Key*
+
+# Temp files
+*.tmp
+*.log
+Thumbs.db
+.DS_Store
