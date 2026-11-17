@@ -33,7 +33,7 @@ The plugin source is not published in this repository yet; this page documents i
 
 ## Q-Section 插件 / The Q-Section plugin
 
-当前版本 **0.11.0**。Current version: **0.11.0**.
+当前版本 **0.11.1**。Current version: **0.11.1**.
 
 它是自建的 Obsidian 插件，包含三部分：
 
@@ -46,6 +46,14 @@ It is a self-built Obsidian plugin with three parts:
 - **Q Section**: a sidebar data view with six top-level modules — Section, Push, Output, Input, Rhythm, and System.
 - **Q Console**: a focus timer, project check-ins, new-object shortcuts, dashboard entry points, and routing.
 - **Auto-routing**: moves notes according to the `type` / `status` / `topic` / `note_kind` / `content_stage` / `period` frontmatter fields.
+
+### 更新记录 / Changelog
+
+- **0.11.1**：修复 Q 操作台「新建」对象的路径生成错误；修复 resource 在没有 `note_kind` 时被放入 `<Topic>/Other`、而不是主题根目录的问题。
+- **0.11.0**：Q 截面六模块、Q 操作台、自动路由。
+
+- **0.11.1**: fixed path generation when creating new objects from Q Console; fixed resources without `note_kind` being placed in `<Topic>/Other` instead of the topic root.
+- **0.11.0**: six-module Q Section, Q Console, and auto-routing.
 
 ### 安装 / Installation
 
