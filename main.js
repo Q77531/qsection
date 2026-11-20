@@ -1323,9 +1323,10 @@ class QSectionReportView extends ItemView {
   }
 
   linkName(raw) {
-    const m = String(raw || '').match(/\[\[([^\]|]+)/);
-    if (!m) return String(raw || '');
-    return m[1].split('/').pop();
+    const text = String(raw || '');
+    const m = text.match(/\[\[([^\]|]+)/);
+    const name = m ? m[1] : text;
+    return name.split('/').pop().replace(/\.md$/i, '');
   }
 
   label(value) {
@@ -4235,9 +4236,10 @@ class ParaRouterPlugin extends Plugin {
   }
 
   linkName(raw) {
-    const m = String(raw || '').match(/\[\[([^\]|]+)/);
-    if (!m) return String(raw || '');
-    return m[1].split('/').pop();
+    const text = String(raw || '');
+    const m = text.match(/\[\[([^\]|]+)/);
+    const name = m ? m[1] : text;
+    return name.split('/').pop().replace(/\.md$/i, '');
   }
 
   focusMinutesLabel(minutes) {

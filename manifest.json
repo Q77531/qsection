@@ -1,7 +1,7 @@
 {
   "id": "qsection",
   "name": "Q-Section",
-  "version": "0.15.13",
+  "version": "0.15.14",
   "minAppVersion": "1.5.0",
   "description": "Q 截面 + Q 操作台：Q 截面只读数据；Q 操作台负责专注、打卡、速记、创作、关系推进、项目完成与领域/路由体检。Read-only six-module Q view; Q console for focus, check-ins, capture, writing, relations, completion and health checks.",
   "author": "qsection",

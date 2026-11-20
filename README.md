@@ -39,7 +39,7 @@ Install: copy the three files into `<your vault>/.obsidian/plugins/qsection/`, r
 
 ## Q-Section 插件 / The Q-Section plugin
 
-当前版本 **0.15.13**。Current version: **0.15.13**.
+当前版本 **0.15.14**。Current version: **0.15.14**.
 
 它是自建的 Obsidian 插件，包含四部分：
 
@@ -59,6 +59,7 @@ It is a self-built Obsidian plugin with four parts:
 
 ### 更新记录 / Changelog
 
+- **0.15.14**：修复 `linkName()` 的 `.md` 口径：链接和裸路径都先取 basename 再剥 `.md`；领域体检与 Q 截面「推进 · 领域」不再把带 `.md` 的领域链接误判为断链。
 - **0.15.13**：新增可选玻璃主题（默认关闭，原主题不变）：玻璃胶囊按钮/输入/卡片/KPI/列表/日历/热力/空状态、页签与任务行滑动胶囊、Q 菜单与四类弹窗玻璃；深色可读性与 reduced-motion / focus 修复。
 - **0.15.11**：Q 操作台收敛为 11 个分区，收藏 / 写作 / 草稿并入「速记」左栏页签；专注、打卡、速记改为左右分栏，右栏内部滚动；按钮组按整行自动换行。
 - **0.15.5**：新增季 / 年日志（`07_Journal/Quarterly|Yearly/{year}`，`period: quarterly/yearly`）与对应命令。
@@ -78,6 +79,7 @@ It is a self-built Obsidian plugin with four parts:
 - **0.11.1**：修复 Q 操作台「新建」对象的路径生成错误；修复 resource 在没有 `note_kind` 时被放入 `<Topic>/Other`、而不是主题根目录的问题。
 - **0.11.0**：Q 截面六模块、Q 操作台、自动路由。
 
+- **0.15.14**: fixed `.md` handling in `linkName()`: links and raw paths now both take the basename and strip `.md`, so area health and the Q view's area grouping no longer treat `.md` area links as broken.
 - **0.15.13**: added an optional glass theme (off by default; the original theme is unchanged): glass capsules for buttons/inputs/cards/KPIs/lists/calendar/heatmap/empty states, sliding capsules for tabs and task rows, glass Q menus and four modal types; improved dark-mode readability plus reduced-motion and focus fixes.
 - **0.15.11**: the Q Console is now 11 sections; favorites, writing and drafts moved into tabs on the left of Quick capture; focus, check-in and capture use two columns with inner scrolling; button rows wrap as a whole.
 - **0.15.5**: added quarterly and yearly journals (`07_Journal/Quarterly|Yearly/{year}`, `period: quarterly/yearly`) and matching commands.
