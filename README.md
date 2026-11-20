@@ -15,11 +15,17 @@
 ```text
 assets/       头像（SVG）与封面（PNG）
 templates/    7 图 HTML 模板（附模板内引用的头像）
-LICENSE       MIT（仅覆盖本仓库自有代码与模板）
+main.js       Q-Section 插件主代码
+styles.css    Q-Section 插件样式
+manifest.json Q-Section 插件清单
+LICENSE       MIT
 ```
 
-插件源码暂未发布到本仓库，这里先提供说明；是否开源由作者决定。
-The plugin source is not published in this repository yet; this page documents it. Whether to open-source it is up to the author.
+插件源码在本仓库根目录：`main.js`、`styles.css`、`manifest.json`。
+The plugin source is now in this repository's root: `main.js`, `styles.css`, `manifest.json`.
+
+安装：把这三个文件复制到 `<你的库>/.obsidian/plugins/qsection/`，重启 Obsidian，在社区插件里启用 Q-Section。
+Install: copy the three files into `<your vault>/.obsidian/plugins/qsection/`, restart Obsidian, and enable Q-Section in Community plugins.
 
 ## 7 图模板 / 7-slide template
 
@@ -33,7 +39,7 @@ The plugin source is not published in this repository yet; this page documents i
 
 ## Q-Section 插件 / The Q-Section plugin
 
-当前版本 **0.15.11**。Current version: **0.15.11**.
+当前版本 **0.15.13**。Current version: **0.15.13**.
 
 它是自建的 Obsidian 插件，包含四部分：
 
@@ -43,14 +49,17 @@ It is a self-built Obsidian plugin with four parts:
 - **Q 操作台（唯一操作入口）**：当前页自适应动作、专注番茄钟（专注集、倒计时/正计时、暂停分段、浮动小窗、Full Calendar）、项目打卡、速记与转化（含收藏、写作、草稿页签）、关系与推进、完成当前对象、新建对象、打开总览、路由、领域体检、路由健康。
 - **自动路由**：按 frontmatter 的 `type` / `status` / `topic` / `note_kind` / `content_stage` / `period` 把笔记移动到对应目录。
 - **独立主题**：Q 主题可跟随 Obsidian、强制浅色或深色；ins 风软表面按钮。
+- **可选玻璃主题**：默认关闭；开启后 Q 操作台和 Q 截面使用半透明玻璃胶囊、滑动页签/行选中、玻璃菜单与弹窗；关闭时原主题不变。
 
 - **Q Section (read-only)**: a sidebar data view with six top-level modules — Section, Push, Output, Input, Rhythm, and System; data and read-only navigation only.
 - **Q Console (the only place that writes)**: current-page actions, a focus timer with saved presets, countdown or stopwatch mode, pause segments, a floating mini window and Full Calendar, project check-ins, quick capture and conversion (with favorites, writing and drafts tabs), relations, completing the current object, new-object shortcuts, dashboard entry points, routing, area health and route health.
 - **Auto-routing**: moves notes according to the `type` / `status` / `topic` / `note_kind` / `content_stage` / `period` frontmatter fields.
 - **Independent theme**: the Q theme follows Obsidian, or stays light/dark on its own; soft-surface, ins-style buttons.
+- **Optional glass theme**: off by default; when enabled, the Q Console and Q Section use translucent glass capsules, sliding tab/row selection, and glass menus/modals; the original theme stays unchanged when off.
 
 ### 更新记录 / Changelog
 
+- **0.15.13**：新增可选玻璃主题（默认关闭，原主题不变）：玻璃胶囊按钮/输入/卡片/KPI/列表/日历/热力/空状态、页签与任务行滑动胶囊、Q 菜单与四类弹窗玻璃；深色可读性与 reduced-motion / focus 修复。
 - **0.15.11**：Q 操作台收敛为 11 个分区，收藏 / 写作 / 草稿并入「速记」左栏页签；专注、打卡、速记改为左右分栏，右栏内部滚动；按钮组按整行自动换行。
 - **0.15.5**：新增季 / 年日志（`07_Journal/Quarterly|Yearly/{year}`，`period: quarterly/yearly`）与对应命令。
 - **0.15.4**：Q 操作台新增「当前页」，按当前笔记的 `type` 显示完成、截止、阶段、关联、打开等动作；切换笔记自动刷新。
@@ -69,6 +78,7 @@ It is a self-built Obsidian plugin with four parts:
 - **0.11.1**：修复 Q 操作台「新建」对象的路径生成错误；修复 resource 在没有 `note_kind` 时被放入 `<Topic>/Other`、而不是主题根目录的问题。
 - **0.11.0**：Q 截面六模块、Q 操作台、自动路由。
 
+- **0.15.13**: added an optional glass theme (off by default; the original theme is unchanged): glass capsules for buttons/inputs/cards/KPIs/lists/calendar/heatmap/empty states, sliding capsules for tabs and task rows, glass Q menus and four modal types; improved dark-mode readability plus reduced-motion and focus fixes.
 - **0.15.11**: the Q Console is now 11 sections; favorites, writing and drafts moved into tabs on the left of Quick capture; focus, check-in and capture use two columns with inner scrolling; button rows wrap as a whole.
 - **0.15.5**: added quarterly and yearly journals (`07_Journal/Quarterly|Yearly/{year}`, `period: quarterly/yearly`) and matching commands.
 - **0.15.4**: added a "current page" block to the Q Console that shows complete, due date, stage, relation and open actions based on the active note's `type`; it refreshes when you switch notes.

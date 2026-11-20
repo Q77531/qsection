@@ -1,0 +1,2848 @@
+.qsection-actions {
+  padding: 12px 14px;
+}
+
+.qsection-actions h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.qsection-actions-sub {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+
+.qsection-actions-stats {
+  color: var(--text-faint);
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+
+.qsection-actions-section {
+  margin: 14px 0;
+}
+
+.qsection-actions-section h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+}
+
+.qsection-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.qsection-actions-button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.qsection-actions-button:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qsection-actions-input {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.qsection-actions-modal-row {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.qsection-report {
+  padding: 12px 14px 24px;
+  font-size: 13px;
+}
+
+.qsection-report-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.qsection-report-title {
+  margin: 0;
+  font-size: 16px;
+}
+
+.qsection-report-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.qsection-report-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.qsection-report-kpi {
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+}
+
+.qsection-report-kpi-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.qsection-report-kpi-value {
+  margin: 2px 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-normal);
+}
+
+.qsection-report-kpi-sub {
+  color: var(--text-faint);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.qsection-report-section {
+  margin: 0 0 14px;
+}
+
+.qsection-report-section h3 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.qsection-report-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.qsection-report-row:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qsection-report-row-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qsection-report-badge {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.qsection-report-empty {
+  padding: 4px 6px;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.qsection-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.qsection-report-button {
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.qsection-report-button:hover {
+  background: var(--background-modifier-hover);
+}
+
+/* Q 截面：模块、图表、管线与复选框汇总 */
+.qsection-report-header {
+  align-items: flex-start;
+}
+
+.qsection-report-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.qsection-report-sub {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.qsection-report-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0 0 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.qsection-report-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.qsection-report-tab:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qsection-report-tab.is-active {
+  color: var(--text-normal);
+  border-bottom-color: var(--interactive-accent);
+}
+
+.qsection-report-tab-count {
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--background-modifier-border);
+  color: var(--text-faint);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.qsection-report-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.qsection-report-toolbar-hint {
+  margin-left: auto;
+}
+
+.qsection-report-range {
+  padding: 2px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.qsection-report-range:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qsection-report-range.is-active {
+  border-color: var(--interactive-accent);
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.qsection-report-kpis {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+}
+
+.qsection-report-note {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.qsection-report-note.is-warning {
+  color: var(--text-warning);
+}
+
+.qsection-report-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: -2px 0 6px;
+}
+
+.qsection-report-muted {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.qsection-report-badge.is-warning {
+  color: var(--text-warning);
+  background: var(--background-modifier-border);
+}
+
+.qsection-report-bar-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 26px;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  font-size: 11px;
+}
+
+.qsection-report-bar-label {
+  color: var(--text-muted);
+}
+
+.qsection-report-bar-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--background-modifier-border);
+}
+
+.qsection-report-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--interactive-accent);
+}
+
+.qsection-report-bar-value {
+  color: var(--text-faint);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.qsection-report-heatmap-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0 4px;
+}
+
+.qsection-report-heatmap {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 12px;
+  gap: 3px;
+  align-items: center;
+  min-height: 12px;
+}
+
+.qsection-report-heatcell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--background-modifier-border);
+}
+
+.qsection-report-heatcell.is-level-1 { opacity: 0.28; background: var(--interactive-accent); }
+.qsection-report-heatcell.is-level-2 { opacity: 0.48; background: var(--interactive-accent); }
+.qsection-report-heatcell.is-level-3 { opacity: 0.72; background: var(--interactive-accent); }
+.qsection-report-heatcell.is-level-4 { opacity: 1; background: var(--interactive-accent); }
+
+.qsection-report-heatcell.is-out {
+  background: transparent;
+}
+
+.qsection-report-heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 6px;
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.qsection-report-heatmap-legend .qsection-report-heatcell {
+  width: 10px;
+  height: 10px;
+}
+
+.qsection-report-checkbox-list {
+  margin-top: 4px;
+}
+
+.qsection-report-checkbox-items {
+  margin: -2px 0 6px 12px;
+  padding-left: 8px;
+  border-left: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.qsection-report-checkbox-item {
+  overflow: hidden;
+  padding: 1px 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 专注 / 番茄钟 */
+.qsection-focus-card {
+  margin: 0 0 16px;
+  padding: 14px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  background: var(--background-secondary);
+  text-align: center;
+}
+
+.qsection-focus-modes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.qsection-focus-mode {
+  padding: 3px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.qsection-focus-mode:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qsection-focus-mode.is-active {
+  border-color: var(--interactive-accent);
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.qsection-focus-mini {
+  --q-blue: #5ac8fa;
+  --q-orange: #ff6b35;
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  padding: 10px;
+  border: 1px solid var(--q-blue);
+  border-radius: 10px;
+  background: var(--background-primary);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  font-family: var(--font-interface);
+  user-select: none;
+}
+
+.qsection-focus-mini-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  cursor: move;
+}
+
+.qsection-focus-mini-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  color: var(--text-normal);
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qsection-focus-mini-title::before {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--q-orange);
+  content: '';
+}
+
+.qsection-focus-mini-close {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.qsection-focus-mini-close:hover {
+  color: var(--text-normal);
+}
+
+.qsection-focus-mini-time {
+  margin-top: 3px;
+  color: var(--text-normal);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.qsection-focus-mini-status {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+.qsection-focus-mini-progress {
+  height: 4px;
+  margin: 7px 0 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--background-modifier-border);
+}
+
+.qsection-focus-mini-progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--q-blue);
+  transition: width 0.3s linear;
+}
+
+.qsection-focus-mini-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.qsection-focus-mini-actions button {
+  flex: 1;
+  padding: 3px 4px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 5px;
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+}
+
+.qsection-focus-mini-actions button:hover {
+  border-color: var(--q-blue);
+  background: var(--background-modifier-hover);
+}
+
+.qsection-focus-mini-actions button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.qsection-focus-presets {
+  margin: 0 0 10px;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-secondary);
+}
+
+.qsection-focus-presets-title {
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.qsection-focus-preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.qsection-focus-preset-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.qsection-focus-preset-item {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qsection-focus-preset-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qsection-focus-preset-item.is-active {
+  border-color: var(--q-blue);
+  background: rgba(90, 200, 250, 0.16);
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.qsection-focus-preset-delete {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.qsection-focus-preset-delete:hover {
+  color: var(--text-error);
+}
+
+.qsection-focus-preset-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.qsection-focus-preset-input {
+  flex: 1;
+  min-width: 100px;
+  padding: 4px 7px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.qsection-focus-preset-input.is-number {
+  flex: 0 0 56px;
+  min-width: 56px;
+  text-align: center;
+}
+
+.qsection-focus-name {
+  width: 100%;
+  margin: 0 0 9px;
+  padding: 5px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-family: inherit;
+  font-size: 12px;
+  text-align: center;
+}
+
+.qsection-focus-name:focus {
+  outline: none;
+  border-color: var(--q-blue);
+}
+
+.qsection-focus-time {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-normal);
+}
+
+.qsection-focus-status {
+  margin: 4px 0 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.qsection-focus-progress {
+  max-width: 420px;
+  height: 8px;
+  margin: 0 auto 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--background-modifier-border);
+}
+
+.qsection-focus-progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--interactive-accent);
+  transition: width 0.3s linear;
+}
+
+.qsection-focus-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.qsection-focus-preset {
+  padding: 2px 7px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.qsection-focus-preset:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qsection-focus-input {
+  width: 64px;
+  padding: 2px 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 11px;
+  text-align: center;
+}
+
+.qsection-focus-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.qsection-focus-primary {
+  padding: 4px 14px;
+  border: 1px solid var(--interactive-accent);
+  border-radius: 6px;
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.qsection-focus-primary:hover {
+  background: var(--background-modifier-active-hover, var(--background-modifier-hover));
+}
+
+.qsection-focus-primary:disabled,
+.qsection-focus-preset:disabled,
+.qsection-focus-input:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.qsection-focus-hint {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.qsection-focus-checkins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.qsection-focus-checkin {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--background-modifier-border);
+  opacity: 0.55;
+}
+
+.qsection-focus-checkin.is-checked {
+  background: var(--interactive-accent);
+  opacity: 1;
+}
+
+.qsection-focus-checkin.is-today {
+  outline: 1px solid var(--text-muted);
+  outline-offset: 1px;
+}
+
+.qsection-focus-history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 78px 46px 70px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.qsection-focus-history-row:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qsection-focus-history-name {
+  overflow: hidden;
+  color: var(--text-normal);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qsection-focus-history-date {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.qsection-focus-history-mode {
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.qsection-focus-history-minutes {
+  overflow: hidden;
+  color: var(--text-normal);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 项目打卡 */
+.qsection-checkin-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 6px;
+}
+
+.qsection-checkin-row:hover {
+  background: var(--background-modifier-hover);
+}
+
+.qsection-checkin-toggle {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.qsection-checkin-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.qsection-checkin-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qsection-checkin-streak {
+  flex: none;
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.qsection-checkin-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.qsection-checkin-input {
+  flex: 1;
+  min-width: 140px;
+  padding: 4px 7px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.qsection-checkin-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.qsection-checkin-month-label {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.qsection-checkin-month-card {
+  margin: 0 0 12px;
+  padding: 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-secondary);
+}
+
+.qsection-checkin-month-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.qsection-checkin-month-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.qsection-checkin-weekdays,
+.qsection-checkin-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.qsection-checkin-weekdays {
+  margin-bottom: 3px;
+  color: var(--text-faint);
+  font-size: 9px;
+  text-align: center;
+}
+
+.qsection-checkin-day {
+  min-height: 22px;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: var(--background-modifier-border);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.qsection-checkin-day:hover:not(:disabled) {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qsection-checkin-day.is-checked {
+  border-color: var(--interactive-accent);
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  box-shadow: inset 0 0 0 1px var(--interactive-accent);
+  font-weight: 600;
+}
+
+.qsection-checkin-day.is-today {
+  outline: 1px solid var(--text-muted);
+  outline-offset: 1px;
+}
+
+.qsection-checkin-day.is-out,
+.qsection-checkin-day:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.qsection-checkin-day.is-out {
+  background: transparent;
+  opacity: 0;
+}
+
+.qsection-checkin-day.is-readonly {
+  pointer-events: none;
+}
+
+.qsection-checkin-archive,
+.qsection-favorite-remove {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.qsection-checkin-archive:hover,
+.qsection-favorite-remove:hover {
+  color: var(--text-error);
+}
+
+.qsection-checkin-archived {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.qsection-areas-group {
+  margin: 0 0 10px;
+}
+
+.qsection-areas-group-title {
+  margin: 6px 0 2px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.qsection-capture-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 8px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.qsection-capture-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.qsection-capture-layout {
+  display: grid;
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 10px;
+}
+
+.qsection-capture-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.qsection-capture-timeline {
+  min-width: 0;
+}
+
+.qsection-capture-card {
+  padding: 9px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-secondary);
+}
+
+.qsection-capture-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.qsection-capture-card-title {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.qsection-capture-nav {
+  display: flex;
+  gap: 2px;
+}
+
+.qsection-capture-nav-button {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.qsection-capture-nav-button:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qsection-capture-weekdays,
+.qsection-capture-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.qsection-capture-weekdays {
+  margin-bottom: 2px;
+  color: var(--text-faint);
+  font-size: 9px;
+  text-align: center;
+}
+
+.qsection-capture-day {
+  position: relative;
+  min-height: 24px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+}
+
+.qsection-capture-day:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qsection-capture-day.has-captures::after {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--interactive-accent);
+  content: '';
+  transform: translateX(-50%);
+}
+
+.qsection-capture-day.is-selected {
+  border-color: var(--interactive-accent);
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.qsection-capture-day.is-out,
+.qsection-capture-day:disabled {
+  cursor: default;
+  opacity: 0.2;
+}
+
+.qsection-capture-heatmap {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 12px;
+  grid-template-rows: repeat(7, 12px);
+  gap: 3px;
+  overflow-x: auto;
+  padding: 2px 0 4px;
+}
+
+.qsection-capture-heatcell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--background-modifier-border);
+}
+
+.qsection-capture-heatcell.is-level-1 { opacity: 0.28; background: var(--interactive-accent); }
+.qsection-capture-heatcell.is-level-2 { opacity: 0.5; background: var(--interactive-accent); }
+.qsection-capture-heatcell.is-level-3 { opacity: 0.74; background: var(--interactive-accent); }
+.qsection-capture-heatcell.is-level-4 { opacity: 1; background: var(--interactive-accent); }
+
+.qsection-capture-heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  color: var(--text-faint);
+  font-size: 9px;
+}
+
+.qsection-capture-heat-legend .qsection-capture-heatcell {
+  width: 10px;
+  height: 10px;
+}
+
+.qsection-capture-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.qsection-capture-stat {
+  padding: 8px 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-secondary);
+  text-align: center;
+}
+
+.qsection-capture-stat-value {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.qsection-capture-stat-label {
+  margin-top: 2px;
+  color: var(--text-faint);
+  font-size: 9px;
+}
+
+.qsection-capture-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.qsection-capture-group {
+  margin-bottom: 12px;
+}
+
+.qsection-capture-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 5px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.qsection-capture-group-date {
+  font-weight: 600;
+}
+
+.qsection-capture-group-count {
+  color: var(--text-faint);
+}
+
+.qsection-capture-item {
+  margin-bottom: 6px;
+  padding: 9px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-secondary);
+}
+
+.qsection-capture-text {
+  color: var(--text-normal);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.qsection-capture-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.qsection-capture-spacer {
+  flex: 1;
+}
+
+.qsection-capture-link {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+}
+
+.qsection-capture-link:hover {
+  color: var(--text-normal);
+}
+
+.qsection-capture-link.is-danger:hover {
+  color: var(--text-error);
+}
+
+.qsection-capture-converted {
+  padding: 1px 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  background: var(--background-primary);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 9px;
+}
+
+.qsection-creation-tabs {
+  margin: 0 0 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.qsection-draft-card {
+  margin-bottom: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-secondary);
+}
+
+.qsection-draft-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.qsection-draft-text {
+  color: var(--text-normal);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.qsection-writing-progress {
+  height: 8px;
+  margin: 4px 0 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--background-modifier-border);
+}
+
+.qsection-writing-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--interactive-accent);
+  transition: width 0.3s ease;
+}
+
+.qsection-writing-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.qsection-draft-input {
+  min-height: 100px;
+}
+
+@media (max-width: 620px) {
+  .qsection-capture-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Q 截面：与 FLO.W 面板区分的品牌层 */
+.qsection-report,
+.qsection-actions {
+  --q-blue: #5ac8fa;
+  --q-orange: #ff6b35;
+}
+
+.qsection-report-title::after,
+.qsection-actions h2::after {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 7px;
+  border-radius: 50%;
+  background: var(--q-orange);
+  content: '';
+  vertical-align: middle;
+}
+
+.qsection-report-sub {
+  color: var(--q-blue);
+  opacity: 0.85;
+}
+
+.qsection-report-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 8px;
+  padding: 3px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 9px;
+  background: var(--background-secondary);
+}
+
+.qsection-report-tab {
+  border: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-muted);
+}
+
+.qsection-report-tab.is-active {
+  border-color: var(--q-blue);
+  background: rgba(90, 200, 250, 0.16);
+  color: var(--text-normal);
+  box-shadow: none;
+}
+
+.qsection-report-tab-count {
+  background: rgba(255, 107, 53, 0.14);
+  color: var(--q-orange);
+}
+
+.qsection-subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0 0 12px;
+  padding: 0 2px;
+}
+
+.qsection-subtab {
+  padding: 3px 9px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.qsection-subtab:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.qsection-subtab.is-active {
+  background: rgba(90, 200, 250, 0.14);
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.qsection-report-kpi {
+  border-left: 3px solid var(--q-blue);
+}
+
+.qsection-report-kpi:nth-child(3n) {
+  border-left-color: var(--q-orange);
+}
+
+.qsection-focus-primary {
+  border-color: var(--q-blue);
+}
+
+.qsection-focus-primary:hover {
+  border-color: var(--q-orange);
+}
+
+.qsection-report-range.is-active {
+  border-color: var(--q-blue);
+  background: rgba(90, 200, 250, 0.16);
+  color: var(--text-normal);
+}
+
+.qsection-report .qsection-report-tabs .qsection-report-tab.is-active {
+  border-color: var(--q-blue) !important;
+  background-color: rgba(90, 200, 250, 0.18) !important;
+  color: var(--text-normal) !important;
+}
+
+.qsection-report .qsection-subtabs .qsection-subtab.is-active {
+  background-color: rgba(90, 200, 250, 0.16) !important;
+  color: var(--text-normal) !important;
+}
+
+.qsection-actions .qsection-focus-primary,
+.qsection-report .qsection-focus-primary {
+  border-color: var(--q-blue) !important;
+}
+
+/* Q 品牌底：炭黑 / 骨白 + 冰蓝 / 橙点 */
+.qsection-report,
+.qsection-actions {
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: inset 0 0 0 1px rgba(90, 200, 250, 0.1);
+}
+
+.theme-dark .qsection-report,
+.theme-dark .qsection-actions {
+  background-color: #111318;
+  background-image:
+    linear-gradient(90deg, rgba(90, 200, 250, 0.5), rgba(255, 107, 53, 0.4) 55%, transparent 88%) top / 100% 2px no-repeat,
+    radial-gradient(circle at 92% 4%, rgba(90, 200, 250, 0.16), transparent 38%),
+    radial-gradient(circle at 4% 96%, rgba(255, 107, 53, 0.1), transparent 34%);
+}
+
+.theme-light .qsection-report,
+.theme-light .qsection-actions {
+  background-color: #f2efe8;
+  background-image:
+    linear-gradient(90deg, rgba(45, 106, 79, 0.55), rgba(255, 107, 53, 0.45) 55%, transparent 88%) top / 100% 2px no-repeat,
+    radial-gradient(circle at 92% 4%, rgba(90, 200, 250, 0.15), transparent 38%),
+    radial-gradient(circle at 4% 96%, rgba(255, 107, 53, 0.08), transparent 34%);
+}
+
+/* 品牌底最终优先级：覆盖主题/Style Manager 的半透明背景 */
+body.theme-dark .qsection-report.qsection-report,
+body.theme-dark .qsection-actions.qsection-actions {
+  background-color: #111318 !important;
+  background-image:
+    linear-gradient(90deg, rgba(90, 200, 250, 0.5), rgba(255, 107, 53, 0.4) 55%, transparent 88%),
+    radial-gradient(circle at 92% 4%, rgba(90, 200, 250, 0.16), transparent 38%),
+    radial-gradient(circle at 4% 96%, rgba(255, 107, 53, 0.1), transparent 34%) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 2px, auto, auto !important;
+}
+
+body.theme-light .qsection-report.qsection-report,
+body.theme-light .qsection-actions.qsection-actions {
+  background-color: #f2efe8 !important;
+  background-image:
+    linear-gradient(90deg, rgba(45, 106, 79, 0.55), rgba(255, 107, 53, 0.45) 55%, transparent 88%),
+    radial-gradient(circle at 92% 4%, rgba(90, 200, 250, 0.15), transparent 38%),
+    radial-gradient(circle at 4% 96%, rgba(255, 107, 53, 0.08), transparent 34%) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 2px, auto, auto !important;
+}
+
+/* Q 独立主题 tokens：不受 Obsidian 主题切换影响 */
+.qsection-theme-light {
+  --q-bg: #f2efe8;
+  --q-surface: #fffcf6;
+  --q-surface-2: #e9e2d7;
+  --q-border: rgba(17, 19, 24, 0.1);
+  --q-text: #111318;
+  --q-muted: #6b665f;
+  --q-faint: #9a948a;
+  --q-accent: #5ac8fa;
+  --q-accent-ink: #0e1a20;
+  --q-orange: #ff6b35;
+  --background-primary: var(--q-bg);
+  --background-secondary: var(--q-surface);
+  --background-modifier-border: var(--q-border);
+  --background-modifier-hover: rgba(17, 19, 24, 0.06);
+  --background-modifier-active-hover: rgba(17, 19, 24, 0.1);
+  --text-normal: var(--q-text);
+  --text-muted: var(--q-muted);
+  --text-faint: var(--q-faint);
+  --interactive-accent: var(--q-accent);
+  --text-on-accent: var(--q-accent-ink);
+}
+
+.qsection-theme-dark {
+  --q-bg: #111318;
+  --q-surface: #1a1f26;
+  --q-surface-2: #232a33;
+  --q-border: rgba(90, 200, 250, 0.16);
+  --q-text: #f2efe8;
+  --q-muted: #b7b2a8;
+  --q-faint: #7e7a72;
+  --q-accent: #5ac8fa;
+  --q-accent-ink: #0e1a20;
+  --q-orange: #ff6b35;
+  --background-primary: var(--q-bg);
+  --background-secondary: var(--q-surface);
+  --background-modifier-border: var(--q-border);
+  --background-modifier-hover: rgba(90, 200, 250, 0.08);
+  --background-modifier-active-hover: rgba(90, 200, 250, 0.12);
+  --text-normal: var(--q-text);
+  --text-muted: var(--q-muted);
+  --text-faint: var(--q-faint);
+  --interactive-accent: var(--q-accent);
+  --text-on-accent: var(--q-accent-ink);
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light,
+body .qsection-actions.qsection-theme-light.qsection-theme-light,
+.qsection-focus-mini.qsection-theme-light.qsection-theme-light {
+  background-color: var(--q-bg) !important;
+  background-image:
+    linear-gradient(90deg, rgba(45, 106, 79, 0.55), rgba(255, 107, 53, 0.45) 55%, transparent 88%),
+    radial-gradient(circle at 92% 4%, rgba(90, 200, 250, 0.15), transparent 38%),
+    radial-gradient(circle at 4% 96%, rgba(255, 107, 53, 0.08), transparent 34%) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 2px, auto, auto !important;
+}
+
+body .qsection-report.qsection-theme-dark.qsection-theme-dark,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark,
+.qsection-focus-mini.qsection-theme-dark.qsection-theme-dark {
+  background-color: var(--q-bg) !important;
+  background-image:
+    linear-gradient(90deg, rgba(90, 200, 250, 0.5), rgba(255, 107, 53, 0.4) 55%, transparent 88%),
+    radial-gradient(circle at 92% 4%, rgba(90, 200, 250, 0.16), transparent 38%),
+    radial-gradient(circle at 4% 96%, rgba(255, 107, 53, 0.1), transparent 34%) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 2px, auto, auto !important;
+}
+
+/* ins 风按钮：软表面、圆角、轻阴影、冰蓝/橙 hover */
+.qsection-report button,
+.qsection-actions button,
+.qsection-focus-mini button {
+  border: 1px solid var(--q-border);
+  border-radius: 10px;
+  background: var(--q-surface);
+  color: var(--q-text);
+  box-shadow: 0 1px 2px rgba(17, 19, 24, 0.05);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.qsection-report button:hover,
+.qsection-actions button:hover,
+.qsection-focus-mini button:hover {
+  border-color: var(--q-accent);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(90, 200, 250, 0.16);
+}
+
+.qsection-report .qsection-focus-primary,
+.qsection-actions .qsection-focus-primary,
+.qsection-focus-mini .qsection-focus-primary {
+  border-color: transparent;
+  background: var(--q-accent);
+  color: var(--q-accent-ink);
+  font-weight: 600;
+}
+
+.qsection-report .qsection-focus-primary:hover,
+.qsection-actions .qsection-focus-primary:hover {
+  border-color: var(--q-orange);
+  background: var(--q-accent);
+}
+
+.qsection-report .qsection-report-tab,
+.qsection-actions .qsection-actions-button,
+.qsection-report .qsection-focus-preset,
+.qsection-report .qsection-focus-mode,
+.qsection-report .qsection-subtab,
+.qsection-actions .qsection-focus-preset,
+.qsection-actions .qsection-focus-mode {
+  border-radius: 999px;
+}
+
+.qsection-focus-preset-item {
+  border-radius: 10px;
+}
+
+.qsection-report input,
+.qsection-actions input,
+.qsection-report textarea,
+.qsection-actions textarea {
+  border: 1px solid var(--q-border);
+  border-radius: 10px;
+  background: var(--q-surface);
+  color: var(--q-text);
+}
+
+.qsection-report .qsection-focus-preset-delete,
+.qsection-actions .qsection-focus-preset-delete,
+.qsection-focus-mini .qsection-focus-mini-close,
+.qsection-report .qsection-checkin-toggle,
+.qsection-actions .qsection-checkin-toggle,
+.qsection-report .qsection-capture-link,
+.qsection-actions .qsection-capture-link {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.qsection-report .qsection-checkin-day,
+.qsection-capture-day {
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+/* 小窗关闭按钮保持透明，不被主题/片段强制成实心按钮 */
+body .qsection-focus-mini.qsection-theme-light.qsection-theme-light .qsection-focus-mini-close,
+body .qsection-focus-mini.qsection-theme-dark.qsection-theme-dark .qsection-focus-mini-close {
+  border: none !important;
+  background: transparent !important;
+  color: var(--q-text) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Q 主题下的主按钮：压过主题 / Style Manager 的按钮样式 */
+.qsection-theme-light,
+.qsection-theme-dark {
+  color: var(--q-text);
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-actions-button,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-actions-button,
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-preset,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset,
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-mode,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-mode,
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-preset-item,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset-item,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-report-button,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-report-button,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-preset,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-mode,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-mode,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-preset-item,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset-item,
+body .qsection-focus-mini.qsection-theme-light.qsection-theme-light .qsection-focus-mini-actions button,
+body .qsection-focus-mini.qsection-theme-dark.qsection-theme-dark .qsection-focus-mini-actions button {
+  border: 1px solid var(--q-border) !important;
+  border-radius: 10px !important;
+  background: var(--q-surface) !important;
+  color: var(--q-text) !important;
+  box-shadow: 0 1px 2px rgba(17, 19, 24, 0.05) !important;
+  font-family: inherit !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-actions-button:hover,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-actions-button:hover,
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-preset:hover,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset:hover,
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-mode:hover,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-mode:hover,
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-preset-item:hover,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset-item:hover,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-report-button:hover,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-report-button:hover,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-preset:hover,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset:hover,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-mode:hover,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-mode:hover,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-preset-item:hover,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset-item:hover,
+body .qsection-focus-mini.qsection-theme-light.qsection-theme-light .qsection-focus-mini-actions button:hover,
+body .qsection-focus-mini.qsection-theme-dark.qsection-theme-dark .qsection-focus-mini-actions button:hover {
+  border-color: var(--q-accent) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 5px 16px rgba(90, 200, 250, 0.16) !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-primary,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-primary,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-primary,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-primary {
+  border-color: transparent !important;
+  background: var(--q-accent) !important;
+  color: var(--q-accent-ink) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 14px rgba(90, 200, 250, 0.2) !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-primary:hover,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-primary:hover,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-primary:hover,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-primary:hover {
+  border-color: var(--q-orange) !important;
+  transform: translateY(-1px) !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light input,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark input,
+body .qsection-report.qsection-theme-light.qsection-theme-light input,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark input,
+body .qsection-actions.qsection-theme-light.qsection-theme-light textarea,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark textarea,
+body .qsection-report.qsection-theme-light.qsection-theme-light textarea,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark textarea {
+  border: 1px solid var(--q-border) !important;
+  border-radius: 10px !important;
+  background: var(--q-surface) !important;
+  color: var(--q-text) !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-preset-item.is-active,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset-item.is-active {
+  border-color: var(--q-accent) !important;
+  background: rgba(90, 200, 250, 0.16) !important;
+  color: var(--q-text) !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-preset-delete,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset-delete,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-preset-delete,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset-delete,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-checkin-toggle,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-checkin-toggle,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-link,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-link {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* 最终修正：模块 tab / 子 tab 完全走 Q 主题，取消主题的绿色 inset */
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-report-tabs,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-report-tabs {
+  border: 1px solid var(--q-border) !important;
+  background: var(--q-surface) !important;
+  box-shadow: none !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-report-tab,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-report-tab {
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--q-muted) !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-report-tab.is-active,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-report-tab.is-active {
+  border-color: var(--q-accent) !important;
+  background: rgba(90, 200, 250, 0.18) !important;
+  color: var(--q-text) !important;
+  box-shadow: none !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-subtab,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-subtab {
+  border: none !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--q-faint) !important;
+  box-shadow: none !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-subtab.is-active,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-subtab.is-active {
+  background: rgba(90, 200, 250, 0.16) !important;
+  color: var(--q-text) !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-primary,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-primary,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-focus-primary,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-focus-primary {
+  border-radius: 10px !important;
+}
+
+/* 操作台里混用 report-button 的按钮：单独压过主题 */
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-report-button,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-report-button {
+  border: 1px solid var(--q-border) !important;
+  border-radius: 10px !important;
+  background: var(--q-surface) !important;
+  color: var(--q-text) !important;
+  box-shadow: 0 1px 2px rgba(17, 19, 24, 0.05) !important;
+  font-family: inherit !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-report-button:hover,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-report-button:hover {
+  border-color: var(--q-accent) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 5px 16px rgba(90, 200, 250, 0.16) !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-checkin-toggle,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-checkin-toggle,
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-checkin-archive,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-checkin-archive,
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-focus-preset-delete,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-focus-preset-delete {
+  border-color: transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--q-muted) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Q 操作台：创作、速记、关系与体检的排版；不改变 Q 主题色 */
+.qsection-actions h4 {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--q-muted);
+}
+
+.qsection-actions .qsection-capture-recent,
+.qsection-actions .qsection-draft-list,
+.qsection-actions .qsection-writing-projects,
+.qsection-actions .qsection-favorites-list {
+  margin-top: 10px;
+}
+
+.qsection-actions .qsection-writing-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--q-muted);
+}
+
+.qsection-health-modal .qsection-health-summary {
+  margin: 0 0 16px;
+  color: var(--q-muted);
+  font-size: 13px;
+}
+
+.qsection-health-modal .qsection-health-section {
+  margin-top: 16px;
+}
+
+.qsection-health-modal .qsection-health-section h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--q-text);
+}
+
+.qsection-health-modal .qsection-health-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--q-border);
+  font-size: 13px;
+}
+
+.qsection-health-modal .qsection-health-row.is-clickable {
+  cursor: pointer;
+}
+
+.qsection-health-modal .qsection-health-row.is-clickable:hover {
+  color: var(--q-accent);
+}
+
+.qsection-health-modal .qsection-health-row-title {
+  color: var(--q-text);
+  font-weight: 500;
+}
+
+.qsection-health-modal .qsection-health-row-meta {
+  color: var(--q-muted);
+  font-size: 12px;
+}
+
+.qsection-health-modal .qsection-health-empty {
+  padding: 6px 0;
+  color: var(--q-faint);
+  font-size: 12px;
+}
+
+/* 速记/打卡/月历按钮：压过主题与 Style Manager 的绿色 inset，保持 Q 主题 */
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-capture-link,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-capture-link,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-link,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-link {
+  border: none !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: var(--q-muted) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  padding: 2px 5px !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-capture-link:hover,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-capture-link:hover,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-link:hover,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-link:hover {
+  color: var(--q-accent) !important;
+  background: rgba(90, 200, 250, 0.12) !important;
+  box-shadow: none !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-capture-link.is-danger,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-capture-link.is-danger {
+  color: var(--q-orange) !important;
+}
+
+body .qsection-actions.qsection-theme-light.qsection-theme-light .qsection-capture-converted,
+body .qsection-actions.qsection-theme-dark.qsection-theme-dark .qsection-capture-converted,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-converted,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-converted {
+  border: 1px solid var(--q-border) !important;
+  border-radius: 999px !important;
+  background: var(--q-surface) !important;
+  color: var(--q-muted) !important;
+  box-shadow: none !important;
+  padding: 2px 8px !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-nav-button,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-nav-button {
+  border: 1px solid var(--q-border) !important;
+  border-radius: 10px !important;
+  background: var(--q-surface) !important;
+  color: var(--q-text) !important;
+  box-shadow: 0 1px 2px rgba(17, 19, 24, 0.05) !important;
+  transform: none !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-nav-button:hover,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-nav-button:hover {
+  border-color: var(--q-accent) !important;
+  background: var(--q-surface) !important;
+  color: var(--q-text) !important;
+  box-shadow: 0 5px 16px rgba(90, 200, 250, 0.16) !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-checkin-day,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-checkin-day,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-day,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-day {
+  border: 1px solid var(--q-border) !important;
+  border-radius: 6px !important;
+  background: var(--q-surface) !important;
+  color: var(--q-text) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-checkin-day.is-checked,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-checkin-day.is-checked,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-day.has-captures,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-day.has-captures {
+  border-color: var(--q-accent) !important;
+  background: rgba(90, 200, 250, 0.18) !important;
+  color: var(--q-text) !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-checkin-day.is-today,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-checkin-day.is-today,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-day.is-selected,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-day.is-selected {
+  border-color: var(--q-orange) !important;
+}
+
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-checkin-day.is-out,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-checkin-day.is-out,
+body .qsection-report.qsection-theme-light.qsection-theme-light .qsection-capture-day.is-out,
+body .qsection-report.qsection-theme-dark.qsection-theme-dark .qsection-capture-day.is-out {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--q-faint) !important;
+}
+
+/* Q 操作台：当前页自适应区块 */
+.qsection-actions .qsection-current-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.qsection-actions .qsection-current-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--q-text);
+}
+
+.qsection-actions .qsection-current-type {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border: 1px solid var(--q-border);
+  border-radius: 999px;
+  background: var(--q-surface);
+  color: var(--q-muted);
+  font-size: 11px;
+}
+
+.qsection-actions .qsection-current-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 6px 0 10px;
+  color: var(--q-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* 专注面板：计时区在左，专注集合在右并内部滚动，不把操作台撑长 */
+.qsection-actions .qsection-focus-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(180px, 0.9fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.qsection-actions .qsection-focus-layout .qsection-focus-card {
+  order: 1;
+  margin: 0;
+  min-width: 0;
+}
+
+.qsection-actions .qsection-focus-layout .qsection-focus-presets {
+  order: 2;
+  margin: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 520px) {
+  .qsection-actions .qsection-focus-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .qsection-actions .qsection-focus-layout .qsection-focus-presets {
+    max-height: 180px;
+  }
+}
+
+/* 操作台：打卡与速记同样左右分栏，右侧列表内部滚动 */
+.qsection-actions .qsection-checkin-layout {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.8fr) minmax(0, 1.2fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.qsection-actions .qsection-checkin-layout .qsection-checkin-main {
+  order: 1;
+  min-width: 0;
+}
+
+.qsection-actions .qsection-checkin-layout .qsection-checkin-list-panel {
+  order: 2;
+  max-height: 340px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 6px;
+  border: 1px solid var(--q-border);
+  border-radius: 8px;
+  background: var(--q-surface);
+}
+
+.qsection-actions .qsection-checkin-list-title {
+  margin-bottom: 6px;
+  color: var(--q-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.qsection-actions .qsection-checkin-layout .qsection-checkin-form {
+  flex-direction: column;
+}
+
+.qsection-actions .qsection-checkin-layout .qsection-checkin-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.qsection-actions .qsection-capture-console-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.qsection-actions .qsection-capture-console-main {
+  order: 1;
+  min-width: 0;
+}
+
+.qsection-actions .qsection-capture-console-layout .qsection-capture-recent {
+  order: 2;
+  margin-top: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 6px;
+  border: 1px solid var(--q-border);
+  border-radius: 8px;
+  background: var(--q-surface);
+}
+
+@media (max-width: 520px) {
+  .qsection-actions .qsection-checkin-layout,
+  .qsection-actions .qsection-capture-console-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .qsection-actions .qsection-checkin-layout .qsection-checkin-list-panel,
+  .qsection-actions .qsection-capture-console-layout .qsection-capture-recent {
+    max-height: 180px;
+  }
+}
+
+/* 速记下方的辅助区：收藏 + 写作目标 + 草稿箱并排，内部滚动，避免操作台继续变长 */
+.qsection-actions .qsection-quick-assist {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--q-border);
+}
+
+.qsection-actions .qsection-quick-assist-col {
+  min-width: 0;
+}
+
+.qsection-actions .qsection-quick-assist-col h4 {
+  margin-top: 0;
+}
+
+.qsection-actions .qsection-quick-assist .qsection-favorites-list,
+.qsection-actions .qsection-quick-assist .qsection-writing-projects {
+  max-height: 160px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+ .qsection-actions .qsection-quick-assist .qsection-draft-list {
+  max-height: 160px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.qsection-actions .qsection-quick-assist .qsection-writing-form {
+  flex-direction: column;
+}
+
+.qsection-actions .qsection-quick-assist .qsection-writing-form .qsection-checkin-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.qsection-actions .qsection-quick-assist .qsection-draft-input {
+  min-height: 80px;
+}
+
+@media (max-width: 720px) {
+  .qsection-actions .qsection-quick-assist {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .qsection-actions .qsection-quick-assist {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 速记左栏空白：收藏 / 写作 / 草稿 三个迷你页签，内部滚动 */
+.qsection-actions .qsection-quick-assist-inline {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--q-border);
+}
+
+.qsection-actions .qsection-quick-assist-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.qsection-actions .qsection-quick-assist-tab {
+  flex: 1;
+  padding: 3px 6px !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--q-muted) !important;
+  box-shadow: none !important;
+  font-size: 11px !important;
+}
+
+.qsection-actions .qsection-quick-assist-tab.is-active {
+  border-color: var(--q-accent) !important;
+  background: rgba(90, 200, 250, 0.16) !important;
+  color: var(--q-text) !important;
+}
+
+.qsection-actions .qsection-quick-assist-content {
+  max-height: 150px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.qsection-actions .qsection-quick-assist-content .qsection-draft-input {
+  min-height: 60px;
+}
+
+.qsection-actions .qsection-quick-assist-content .qsection-writing-form {
+  flex-direction: column;
+}
+
+.qsection-actions .qsection-quick-assist-content .qsection-writing-form .qsection-checkin-input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* ===== Glass theme (optional, scoped; off keeps the original Q theme) ===== */
+.qsection-glass.qsection-theme-light {
+  --q-glass-surface: rgba(255, 252, 246, 0.68);
+  --q-glass-surface-strong: rgba(255, 252, 246, 0.86);
+  --q-glass-border: rgba(255, 255, 255, 0.62);
+  --q-glass-border-soft: rgba(17, 19, 24, 0.10);
+  --q-glass-highlight: rgba(255, 255, 255, 0.86);
+  --q-glass-shadow: 0 10px 30px rgba(17, 19, 24, 0.14);
+  --q-glass-blur: 18px;
+  --q-bg: rgba(242, 239, 232, 0.26);
+  --q-surface: var(--q-glass-surface);
+  --q-surface-2: rgba(233, 226, 215, 0.58);
+  --q-border: var(--q-glass-border);
+  --q-muted: #3f3b35;
+  --q-faint: #4f4a42;
+}
+
+.qsection-glass.qsection-theme-dark {
+  --q-glass-surface: rgba(26, 31, 38, 0.72);
+  --q-glass-surface-strong: rgba(26, 31, 38, 0.88);
+  --q-glass-border: rgba(255, 255, 255, 0.22);
+  --q-glass-border-soft: rgba(90, 200, 250, 0.22);
+  --q-glass-highlight: rgba(255, 255, 255, 0.26);
+  --q-glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.42);
+  --q-glass-blur: 18px;
+  --q-bg: rgba(17, 19, 24, 0.30);
+  --q-surface: var(--q-glass-surface);
+  --q-surface-2: rgba(35, 42, 51, 0.66);
+  --q-border: var(--q-glass-border);
+  --q-muted: #d8d3c9;
+  --q-faint: #c9c4ba;
+}
+
+/* Surfaces: buttons, inputs, cards, rows, KPI */
+body .qsection-actions.qsection-glass.qsection-glass.qsection-glass :is(
+  .qsection-actions-button,
+  .qsection-actions-input,
+  .qsection-focus-card,
+  .qsection-focus-mode,
+  .qsection-focus-preset,
+  .qsection-focus-preset-item,
+  .qsection-focus-name,
+  .qsection-focus-input,
+  .qsection-focus-checkin,
+  .qsection-checkin-row,
+  .qsection-checkin-input,
+  .qsection-checkin-toggle,
+  .qsection-checkin-month-card,
+  .qsection-capture-input,
+  .qsection-capture-card,
+  .qsection-capture-stat,
+  .qsection-capture-nav-button,
+  .qsection-focus-history-row
+),
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass :is(
+  .qsection-report-button,
+  .qsection-report-tab,
+  .qsection-subtab,
+  .qsection-report-kpi,
+  .qsection-report-row,
+  .qsection-report-section,
+  .qsection-report-range,
+  .qsection-report-note,
+  .qsection-report-checkbox-item,
+  .qsection-focus-card,
+  .qsection-focus-mode,
+  .qsection-focus-preset,
+  .qsection-focus-preset-item,
+  .qsection-capture-card,
+  .qsection-capture-stat,
+  .qsection-checkin-month-card,
+  .qsection-checkin-row
+) {
+  background: var(--q-glass-surface) !important;
+  border-color: var(--q-glass-border) !important;
+  box-shadow:
+    inset 0 1px 0 var(--q-glass-highlight),
+    inset 0 0 0 1px var(--q-glass-border-soft),
+    var(--q-glass-shadow) !important;
+  backdrop-filter: blur(var(--q-glass-blur)) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(var(--q-glass-blur)) saturate(140%) !important;
+}
+
+/* Capsule radii */
+body .qsection-glass.qsection-glass.qsection-glass :is(
+  .qsection-actions-button,
+  .qsection-report-button,
+  .qsection-focus-mode,
+  .qsection-focus-preset,
+  .qsection-focus-preset-item,
+  .qsection-capture-nav-button,
+  .qsection-checkin-row,
+  .qsection-report-row,
+  .qsection-focus-history-row,
+  .qsection-report-checkbox-item,
+  .qsection-report-range
+) {
+  border-radius: 999px !important;
+}
+
+body .qsection-glass.qsection-glass.qsection-glass :is(
+  .qsection-focus-card,
+  .qsection-report-kpi,
+  .qsection-report-section,
+  .qsection-capture-card,
+  .qsection-capture-stat,
+  .qsection-report-note,
+  .qsection-checkin-month-card
+) {
+  border-radius: 22px !important;
+}
+
+body .qsection-glass.qsection-glass.qsection-glass :is(
+  .qsection-actions-input,
+  .qsection-focus-input,
+  .qsection-focus-name,
+  .qsection-capture-input,
+  .qsection-checkin-input
+) {
+  border-radius: 999px !important;
+}
+
+/* Segmented groups: transparent items + sliding pill */
+body .qsection-glass .qsection-report-tabs,
+body .qsection-glass .qsection-subtabs,
+body .qsection-glass .qsection-focus-modes,
+body .qsection-glass .qsection-focus-settings {
+  position: relative;
+}
+
+body .qsection-glass .qsection-report-tabs,
+body .qsection-glass .qsection-subtabs,
+body .qsection-glass .qsection-focus-modes {
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--q-glass-surface);
+  border: 1px solid var(--q-glass-border-soft);
+  box-shadow: inset 0 1px 0 var(--q-glass-highlight);
+  backdrop-filter: blur(var(--q-glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--q-glass-blur)) saturate(140%);
+}
+
+body .qsection-glass .qsection-focus-settings {
+  padding: 8px;
+  border-radius: 22px;
+  background: var(--q-glass-surface);
+  border: 1px solid var(--q-glass-border-soft);
+  box-shadow: inset 0 1px 0 var(--q-glass-highlight);
+  backdrop-filter: blur(var(--q-glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--q-glass-blur)) saturate(140%);
+}
+
+body .qsection-actions.qsection-glass.qsection-glass.qsection-glass .qsection-segment-item,
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass .qsection-segment-item {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  position: relative;
+  z-index: 1;
+}
+
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass .qsection-report-tab.is-active,
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass .qsection-subtab.is-active,
+body .qsection-actions.qsection-glass.qsection-glass.qsection-glass .qsection-focus-mode.qsection-glass-active,
+body .qsection-actions.qsection-glass.qsection-glass.qsection-glass .qsection-duration-preset.qsection-glass-active {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+body .qsection-actions.qsection-glass.qsection-glass.qsection-glass .qsection-focus-mode.qsection-glass-active,
+body .qsection-actions.qsection-glass.qsection-glass.qsection-glass .qsection-duration-preset.qsection-glass-active {
+  color: var(--q-text) !important;
+  font-weight: 600;
+}
+
+body .qsection-actions.qsection-glass.qsection-glass.qsection-glass .qsection-segment-item:hover,
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass .qsection-segment-item:hover {
+  background: var(--q-glass-surface) !important;
+}
+
+.qsection-segment-pill {
+  display: none;
+}
+
+body .qsection-glass .qsection-segment-pill {
+  display: block;
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  background: var(--q-glass-surface-strong);
+  border: 1px solid var(--q-glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--q-glass-highlight),
+    0 4px 14px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  transform-origin: center;
+  transition:
+    left 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    top 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    width 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+body .qsection-glass .qsection-segment-pill.is-moving {
+  transform: scaleX(1.12);
+}
+
+/* KPI: glass card + status dot instead of a hard left bar */
+body .qsection-report.qsection-glass .qsection-report-kpi {
+  position: relative;
+  border-left: 1px solid var(--q-glass-border) !important;
+}
+
+body .qsection-report.qsection-glass .qsection-report-kpi::before {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--q-blue);
+  box-shadow: 0 0 8px var(--q-blue);
+}
+
+body .qsection-report.qsection-glass .qsection-report-kpi:nth-child(3n)::before {
+  background: var(--q-orange);
+  box-shadow: 0 0 8px var(--q-orange);
+}
+
+/* Primary action keeps the accent, but as tinted glass */
+body .qsection-actions.qsection-glass.qsection-glass.qsection-glass .qsection-focus-primary {
+  background: rgba(90, 200, 250, 0.78) !important;
+  border-color: rgba(90, 200, 250, 0.92) !important;
+  color: #0e1a20 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 6px 18px rgba(90, 200, 250, 0.28) !important;
+}
+
+/* Focus mini window */
+body .qsection-focus-mini.qsection-glass.qsection-glass {
+  background: var(--q-glass-surface-strong) !important;
+  border: 1px solid var(--q-glass-border) !important;
+  box-shadow: var(--q-glass-shadow) !important;
+  backdrop-filter: blur(var(--q-glass-blur)) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(var(--q-glass-blur)) saturate(140%) !important;
+}
+
+/* Phase 3: calendar, heatmap, empty states, dark contrast */
+body .qsection-glass .qsection-capture-day:not(.has-captures):not(.is-today):not(.is-selected):not(.is-out),
+body .qsection-glass .qsection-checkin-day:not(.is-checked):not(.is-today):not(.is-selected):not(.is-out) {
+  background: var(--q-glass-surface) !important;
+  border: 1px solid var(--q-glass-border-soft) !important;
+  border-radius: 10px !important;
+  box-shadow: inset 0 1px 0 var(--q-glass-highlight) !important;
+}
+
+body .qsection-glass :is(.qsection-report-heatcell, .qsection-capture-heatcell) {
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--q-glass-border-soft);
+}
+
+body .qsection-glass :is(.qsection-report-empty, .qsection-focus-empty, .qsection-health-empty) {
+  background: var(--q-glass-surface);
+  border: 1px solid var(--q-glass-border-soft);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 var(--q-glass-highlight);
+  backdrop-filter: blur(var(--q-glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--q-glass-blur)) saturate(140%);
+}
+
+body .qsection-glass.qsection-theme-dark :is(.qsection-report-row-title, .qsection-report-empty, .qsection-focus-empty) {
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+
+body .qsection-glass.qsection-theme-dark .qsection-report-badge {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: var(--q-text) !important;
+  border: 1px solid var(--q-glass-border-soft);
+}
+
+/* Q modals */
+body .modal.qsection-glass.qsection-glass {
+  background: var(--q-glass-surface-strong) !important;
+  border: 1px solid var(--q-glass-border) !important;
+  border-radius: 22px !important;
+  box-shadow: var(--q-glass-shadow) !important;
+  backdrop-filter: blur(var(--q-glass-blur)) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(var(--q-glass-blur)) saturate(140%) !important;
+}
+
+body .modal.qsection-glass .modal-content {
+  background: transparent !important;
+}
+
+body .modal.qsection-glass .qsection-actions-input {
+  background: var(--q-glass-surface) !important;
+  border: 1px solid var(--q-glass-border) !important;
+  border-radius: 999px !important;
+  box-shadow: inset 0 1px 0 var(--q-glass-highlight) !important;
+  color: var(--q-text) !important;
+}
+
+body .modal.qsection-glass .qsection-actions-modal-row button {
+  background: var(--q-glass-surface) !important;
+  border: 1px solid var(--q-glass-border) !important;
+  border-radius: 999px !important;
+  color: var(--q-text) !important;
+  box-shadow: inset 0 1px 0 var(--q-glass-highlight), 0 6px 18px rgba(0, 0, 0, 0.12) !important;
+}
+
+body .modal.qsection-glass .qsection-actions-modal-row button.mod-cta {
+  background: rgba(90, 200, 250, 0.78) !important;
+  border-color: rgba(90, 200, 250, 0.92) !important;
+  color: #0e1a20 !important;
+}
+
+body .qsection-glass .qsection-report-row:hover {
+  background: var(--q-glass-surface-strong) !important;
+}
+
+body .qsection-glass :is(.qsection-capture-day, .qsection-checkin-day) {
+  border: 1px solid var(--q-glass-border-soft) !important;
+  border-radius: 10px !important;
+  box-shadow: inset 0 1px 0 var(--q-glass-highlight) !important;
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+}
+
+body .qsection-glass :is(.qsection-capture-day.is-today, .qsection-capture-day.is-selected, .qsection-checkin-day.is-today, .qsection-checkin-day.is-selected) {
+  border-color: var(--q-orange) !important;
+}
+
+/* Phase 3b: higher-specificity calendar/heatmap glass (beats Q theme overrides) */
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass .qsection-capture-day:not(.is-out):not(:disabled),
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass .qsection-checkin-day:not(.is-out):not(:disabled) {
+  border: 1px solid var(--q-glass-border-soft) !important;
+  border-radius: 10px !important;
+  box-shadow: inset 0 1px 0 var(--q-glass-highlight) !important;
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+}
+
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass .qsection-capture-day:not(.has-captures):not(.is-today):not(.is-selected):not(.is-out):not(:disabled),
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass .qsection-checkin-day:not(.is-checked):not(.is-today):not(.is-selected):not(.is-out):not(:disabled) {
+  background: var(--q-glass-surface) !important;
+}
+
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass :is(.qsection-capture-day.is-today, .qsection-capture-day.is-selected, .qsection-checkin-day.is-today, .qsection-checkin-day.is-selected) {
+  border-color: var(--q-orange) !important;
+}
+
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass :is(.qsection-report-heatcell, .qsection-capture-heatcell) {
+  border-color: var(--q-glass-border-soft) !important;
+}
+
+/* Readable helper captions in the glass theme */
+body .qsection-glass :is(.qsection-report-muted, .qsection-actions-sub, .qsection-actions-stats, .qsection-focus-hint) {
+  color: var(--q-muted) !important;
+  background: var(--q-glass-surface);
+  border: 1px solid var(--q-glass-border-soft);
+  border-radius: 12px;
+  padding: 8px 12px;
+  box-shadow: inset 0 1px 0 var(--q-glass-highlight);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+}
+
+/* Selectable report rows with a sliding capsule (glass theme only) */
+.qsection-row-pill {
+  display: none;
+}
+
+body .qsection-glass .qsection-row-group {
+  position: relative;
+}
+
+body .qsection-glass .qsection-report-row {
+  cursor: pointer;
+}
+
+body .qsection-glass .qsection-report-row.is-selected {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  position: relative;
+  z-index: 1;
+}
+
+body .qsection-glass .qsection-report-row.is-selected .qsection-report-row-title {
+  font-weight: 600;
+}
+
+body .qsection-glass .qsection-row-pill {
+  display: block;
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  background: var(--q-glass-surface-strong);
+  border: 1px solid var(--q-glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--q-glass-highlight),
+    0 4px 14px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  transform-origin: center;
+  transition:
+    left 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    top 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    width 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+body .qsection-glass .qsection-row-pill.is-moving {
+  transform: scaleY(1.08);
+}
+
+/* Q-specific menus */
+body .menu.qsection-glass.qsection-glass,
+body .menu.qsection-glass-menu.qsection-glass {
+  background: var(--q-glass-surface-strong) !important;
+  border: 1px solid var(--q-glass-border) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--q-glass-shadow) !important;
+  backdrop-filter: blur(var(--q-glass-blur)) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(var(--q-glass-blur)) saturate(140%) !important;
+}
+
+body .menu.qsection-glass .menu-item {
+  border-radius: 10px;
+  color: var(--q-text) !important;
+}
+
+body .menu.qsection-glass .menu-item:hover {
+  background: var(--q-glass-surface) !important;
+}
+
+/* Audit: avoid nested backdrop blur on dense rows */
+body .qsection-glass :is(.qsection-report-row, .qsection-focus-preset-item, .qsection-checkin-row, .qsection-report-checkbox-item) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Audit: visible keyboard focus on glass controls */
+body .qsection-glass :is(button, [role="button"]):focus-visible {
+  outline: 2px solid var(--q-accent);
+  outline-offset: 2px;
+}
+
+/* Audit: reduced motion keeps state change, drops stretch/slide */
+@media (prefers-reduced-motion: reduce) {
+  body .qsection-glass .qsection-segment-pill,
+  body .qsection-glass .qsection-row-pill {
+    transition: none !important;
+  }
+  body .qsection-glass .qsection-segment-pill.is-moving,
+  body .qsection-glass .qsection-row-pill.is-moving {
+    transform: none !important;
+  }
+}
+
+/* Hover-selected report row: stronger glass + accent edge */
+body .qsection-glass .qsection-report-row {
+  cursor: pointer;
+}
+
+body .qsection-glass .qsection-row-pill {
+  background: color-mix(in srgb, var(--q-accent) 10%, var(--q-glass-surface-strong));
+  border-color: color-mix(in srgb, var(--q-accent) 55%, var(--q-glass-border));
+  box-shadow:
+    inset 0 1px 0 var(--q-glass-highlight),
+    inset 0 0 0 1px color-mix(in srgb, var(--q-accent) 20%, transparent),
+    0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+body .qsection-glass .qsection-report-row.is-selected .qsection-report-row-title {
+  font-weight: 600;
+}
