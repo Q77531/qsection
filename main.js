@@ -1426,6 +1426,7 @@ class QSectionReportView extends ItemView {
     this.favoriteBusy = false;
     this.captureMonth = window.moment().startOf('month');
     this.captureFilterDate = '';
+    this.randomCaptureId = '';
     this.captureToken = 0;
     this.creationMode = 'drafts';
     this.writingToken = 0;
@@ -2088,7 +2089,7 @@ class QSectionReportView extends ItemView {
     if (token !== this.captureToken || !this.isActive('input', 'capture')) return;
     timeline.empty();
     this.renderCaptureCalendar(side, captures);
-    this.renderCaptureHeatmap(side, captures);
+    this.renderRandomCapture(side, captures);
     this.renderCaptureStats(side, captures);
     this.renderCaptureTimeline(timeline, captures);
   }
@@ -2135,27 +2136,44 @@ class QSectionReportView extends ItemView {
     }
   }
 
-  renderCaptureHeatmap(parent, captures) {
-    const card = parent.createDiv({ cls: 'qsection-capture-card' });
-    const today = window.moment().startOf('day');
-    const start = today.clone().subtract(83, 'days').startOf('isoWeek');
-    const counts = new Map();
-    for (const capture of captures) counts.set(capture.date, (counts.get(capture.date) || 0) + 1);
-    card.createDiv({ cls: 'qsection-capture-card-title', text: '近 12 周' });
-    const heat = card.createDiv({ cls: 'qsection-capture-heatmap' });
-    const cursor = start.clone();
-    while (cursor.isSameOrBefore(today, 'day')) {
-      const key = cursor.format('YYYY-MM-DD');
-      const count = counts.get(key) || 0;
-      const cell = heat.createDiv({ cls: 'qsection-capture-heatcell' });
-      if (count > 0) cell.addClass('is-level-' + Math.min(4, count));
-      cell.setAttribute('title', `${key} · ${count} 条`);
-      cursor.add(1, 'day');
+  renderRandomCapture(parent, captures) {
+    const card = parent.createDiv({ cls: 'qsection-capture-card qsection-random-capture' });
+    const head = card.createDiv({ cls: 'qsection-capture-card-head' });
+    const title = head.createDiv({ cls: 'qsection-capture-card-title' });
+    title.createSpan({ text: '随机速记' });
+    title.createSpan({ cls: 'qsection-random-capture-dot' });
+
+    const pool = captures.filter((capture) => !capture.converted);
+    if (!pool.length) {
+      card.createDiv({ cls: 'qsection-report-empty', text: '还没有未转化的速记。' });
+      card.createDiv({ cls: 'qsection-random-capture-hint', text: '已转笔记 / 任务 / 项目的不进入抽签。' });
+      return;
     }
-    const legend = card.createDiv({ cls: 'qsection-capture-heat-legend' });
-    legend.createSpan({ text: '少' });
-    [0, 1, 2, 3, 4].forEach((level) => legend.createDiv({ cls: 'qsection-capture-heatcell' + (level ? ' is-level-' + level : '') }));
-    legend.createSpan({ text: '多' });
+
+    let current = pool.find((capture) => capture.id === this.randomCaptureId);
+    if (!current) {
+      current = pool[Math.floor(Math.random() * pool.length)];
+      this.randomCaptureId = current.id;
+    }
+
+    const draw = head.createEl('button', { cls: 'qsection-capture-link qsection-random-capture-draw', text: '换一条' });
+    draw.addEventListener('click', () => {
+      const nextPool = pool.filter((capture) => capture.id !== current.id);
+      const next = nextPool.length ? nextPool[Math.floor(Math.random() * nextPool.length)] : current;
+      this.randomCaptureId = next.id;
+      this.render();
+    });
+    if (pool.length < 2) {
+      draw.disabled = true;
+      draw.setAttribute('title', '只有一条未转化速记');
+    }
+
+    card.createDiv({ cls: 'qsection-random-capture-text', text: current.text });
+    const meta = card.createDiv({ cls: 'qsection-random-capture-meta' });
+    meta.createSpan({ text: `${current.date} ${current.time || ''}`.trim() });
+    const open = meta.createEl('button', { cls: 'qsection-capture-link', text: '打开日笔记' });
+    open.addEventListener('click', () => { void this.app.workspace.openLinkText(current.path, '', true); });
+    card.createDiv({ cls: 'qsection-random-capture-hint', text: '只抽未转化的速记。' });
   }
 
   renderCaptureStats(parent, captures) {

@@ -39,7 +39,7 @@ Install: copy the three files into `<your vault>/.obsidian/plugins/qsection/`, r
 
 ## Q-Section 插件 / The Q-Section plugin
 
-当前版本 **0.15.17**。Current version: **0.15.17**.
+当前版本 **0.15.18**。Current version: **0.15.18**.
 
 它是自建的 Obsidian 插件，包含四部分：
 
@@ -65,6 +65,7 @@ The focus desktop window is an Obsidian popout. On desktop it opens automaticall
 
 ### 更新记录 / Changelog
 
+- **0.15.18**：Q 截面 → 输入 → 收集：移除「近 12 周」速记热力图，改为「随机速记」卡片；只抽未转化为笔记 / 任务 / 项目的速记，可换一条或打开来源日笔记。
 - **0.15.17**：桌面小窗打开 / 重开时自动定位到当前屏幕右上角（8px 边距），仍自动置顶；尺寸保持 240×240。
 - **0.15.16**：专注记录写入日笔记「今日安排」时按 `startTime` 重排有时间戳的条目，新增记录不再总排最后；桌面小窗缩到 240×240，打开即自动置顶。
 - **0.15.15**：专注新增「桌面小窗」popout 独立窗口，桌面版开始计时自动打开；可拖到副屏，窗口内「置顶」按钮切换系统置顶，PowerToys Always On Top 可作兜底；原「小窗」保留。
@@ -88,6 +89,7 @@ The focus desktop window is an Obsidian popout. On desktop it opens automaticall
 - **0.11.1**：修复 Q 操作台「新建」对象的路径生成错误；修复 resource 在没有 `note_kind` 时被放入 `<Topic>/Other`、而不是主题根目录的问题。
 - **0.11.0**：Q 截面六模块、Q 操作台、自动路由。
 
+- **0.15.18**: the Q view's Input → Capture page replaces the 12-week capture heatmap with a random capture card; it draws only captures not yet converted to a note, task or project, and can draw again or open the source daily note.
 - **0.15.17**: the focus desktop window now moves to the top-right corner of the current screen (8px margin) on open/reopen, while staying pinned; the 240×240 size is unchanged.
 - **0.15.16**: focus records now sort the `### 今日安排` entries with a `startTime` when written, so a new record no longer stays at the bottom; the desktop focus window is 240×240 and is pinned on open.
 - **0.15.15**: added a "focus desktop window" popout for the focus timer; starting the timer opens it automatically on desktop. It can be moved to another monitor; the in-window "Always on top" button toggles system pinning, with PowerToys Always On Top as a fallback. The original in-app mini window is unchanged.

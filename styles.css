@@ -1251,40 +1251,50 @@
   opacity: 0.2;
 }
 
-.qsection-capture-heatmap {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 12px;
-  grid-template-rows: repeat(7, 12px);
-  gap: 3px;
-  overflow-x: auto;
-  padding: 2px 0 4px;
+.qsection-random-capture {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
-.qsection-capture-heatcell {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-  background: var(--background-modifier-border);
+.qsection-random-capture .qsection-capture-card-head {
+  margin-bottom: 0;
 }
 
-.qsection-capture-heatcell.is-level-1 { opacity: 0.28; background: var(--interactive-accent); }
-.qsection-capture-heatcell.is-level-2 { opacity: 0.5; background: var(--interactive-accent); }
-.qsection-capture-heatcell.is-level-3 { opacity: 0.74; background: var(--interactive-accent); }
-.qsection-capture-heatcell.is-level-4 { opacity: 1; background: var(--interactive-accent); }
+.qsection-random-capture-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: var(--q-orange);
+  vertical-align: 2px;
+}
 
-.qsection-capture-heat-legend {
+.qsection-random-capture-text {
+  max-height: 150px;
+  overflow: auto;
+  padding-right: 2px;
+  color: var(--text-normal);
+  font-size: 12px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.qsection-random-capture-meta {
   display: flex;
   align-items: center;
-  gap: 3px;
-  margin-top: 4px;
+  justify-content: space-between;
+  gap: 6px;
   color: var(--text-faint);
-  font-size: 9px;
+  font-size: 10px;
 }
 
-.qsection-capture-heat-legend .qsection-capture-heatcell {
-  width: 10px;
-  height: 10px;
+.qsection-random-capture-hint {
+  color: var(--text-faint);
+  font-size: 9px;
+  line-height: 1.4;
 }
 
 .qsection-capture-stats {
@@ -2674,7 +2684,7 @@ body .qsection-glass .qsection-checkin-day:not(.is-checked):not(.is-today):not(.
   box-shadow: inset 0 1px 0 var(--q-glass-highlight) !important;
 }
 
-body .qsection-glass :is(.qsection-report-heatcell, .qsection-capture-heatcell) {
+body .qsection-glass .qsection-report-heatcell {
   border-radius: 4px;
   box-shadow: inset 0 0 0 1px var(--q-glass-border-soft);
 }
@@ -2769,7 +2779,7 @@ body .qsection-report.qsection-glass.qsection-glass.qsection-glass :is(.qsection
   border-color: var(--q-orange) !important;
 }
 
-body .qsection-report.qsection-glass.qsection-glass.qsection-glass :is(.qsection-report-heatcell, .qsection-capture-heatcell) {
+body .qsection-report.qsection-glass.qsection-glass.qsection-glass .qsection-report-heatcell {
   border-color: var(--q-glass-border-soft) !important;
 }
 
