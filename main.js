@@ -3061,6 +3061,10 @@ class ParaRouterPlugin extends Plugin {
     const field = rule.field || 'status';
     const rawValue = textValue(fm[field]);
     const value = rawValue.toLowerCase();
+    const dueField = rule.dueField || '截止';
+    if (rule.undatedRoutes && !textValue(fm[dueField]) && Object.prototype.hasOwnProperty.call(rule.undatedRoutes, value)) {
+      return this.applyTemplate(rule.undatedRoutes[value], fm, rawValue);
+    }
     if (rule.routes && Object.prototype.hasOwnProperty.call(rule.routes, value)) {
       return this.applyTemplate(rule.routes[value], fm, rawValue);
     }
@@ -3539,7 +3543,13 @@ class ParaRouterPlugin extends Plugin {
 
   renderTemplate(content, title) {
     const now = window.moment();
-    let out = content;
+    let out = String(content || '');
+    out = out.replace(/^(---\r?\n)([\s\S]*?)(\r?\n---)/, (match, open, frontmatter, close) => {
+      const rendered = frontmatter.replace(/"\{\{date(?::([^}]+))?\}\}"/g, (token, format) => (
+        format ? now.format(format) : now.format('YYYY-MM-DD')
+      ));
+      return open + rendered + close;
+    });
     out = out.split('{{title}}').join(title);
     out = out.split('{{date:YYYY-MM-DD}}').join(now.format('YYYY-MM-DD'));
     out = out.split('{{date:YYYY-MM}}').join(now.format('YYYY-MM'));
@@ -4451,10 +4461,11 @@ class ParaRouterPlugin extends Plugin {
     const created = window.moment().format('YYYY-MM-DD HH:mm');
     let folder = '03_Resources/Other/Notes/速记';
     let frontmatter = ['---', 'type: note', 'note_kind: 速记', 'topic: other', `创建时间: ${created}`, 'tags: []', '---'];
+    let taskDue = '';
     if (type === 'task') {
-      folder = '08_Tasks/Todo';
-      const due = await this.promptTaskDueDate();
-      const dueLine = due ? `截止: ${due}` : '截止:';
+      taskDue = await this.promptTaskDueDate();
+      folder = taskDue ? '08_Tasks/Todo' : '08_Tasks/每日任务';
+      const dueLine = taskDue ? `截止: ${taskDue}` : '截止:';
       frontmatter = ['---', 'type: task', 'status: todo', 'project:', dueLine, `创建时间: ${created}`, 'tags: []', '---'];
     } else if (type === 'project') {
       folder = '01_Projects/Active';
@@ -4471,6 +4482,13 @@ class ParaRouterPlugin extends Plugin {
       at: new Date().toISOString()
     };
     await this.saveSettings();
+    if (type === 'task' && !taskDue) {
+      try {
+        await this.appendTodoToDailyNote(window.moment().format('YYYY-MM-DD'), `- [ ] [[${file.path.replace(/\.md$/i, '')}|${file.basename}]]`);
+      } catch (err) {
+        new Notice('Q-Section: 任务已建，但今日待办写入失败：' + (err && err.message ? err.message : err));
+      }
+    }
     await this.app.workspace.getLeaf(true).openFile(file);
     return file;
   }
@@ -4547,6 +4565,8 @@ class ParaRouterPlugin extends Plugin {
       '',
       '### 今日打卡',
       '',
+      '### 今日待办',
+      '',
       '### 今日安排',
       ''
     ].join('\n');
@@ -4619,6 +4639,35 @@ class ParaRouterPlugin extends Plugin {
     const tailText = tail.replace(/^\s*/, '');
     const section = rebuilt ? '\n\n' + rebuilt + '\n' : '\n';
     return before + section + (tailText ? '\n' + tailText : '\n');
+  }
+
+  insertDailyTodoLine(text, line) {
+    const heading = '### 今日待办';
+    const entry = String(line || '').trim();
+    if (!entry) return text;
+    const index = text.indexOf(heading);
+    if (index !== -1) {
+      const after = index + heading.length;
+      const rest = text.slice(after);
+      const next = rest.search(/\n#{2,3}\s/);
+      const body = next === -1 ? rest : rest.slice(0, next);
+      const tail = next === -1 ? '' : rest.slice(next);
+      const existing = String(body || '').trim();
+      const rebuilt = existing ? existing + '\n' + entry : entry;
+      const before = text.slice(0, after).replace(/\s*$/, '');
+      const tailText = tail.replace(/^\s*/, '');
+      return before + '\n\n' + rebuilt + '\n' + (tailText ? '\n' + tailText : '\n');
+    }
+    const beforeSchedule = text.indexOf('### 今日安排');
+    if (beforeSchedule !== -1) {
+      return text.slice(0, beforeSchedule).replace(/\s*$/, '') + '\n\n' + heading + '\n\n' + entry + '\n\n' + text.slice(beforeSchedule);
+    }
+    return text.replace(/\s*$/, '') + '\n\n' + heading + '\n\n' + entry + '\n';
+  }
+
+  async appendTodoToDailyNote(date, line) {
+    const file = await this.ensureDailyNoteFile(date);
+    await this.app.vault.process(file, (text) => this.insertDailyTodoLine(text, line));
   }
 
   async ensureDailyNoteFile(date) {
@@ -4760,9 +4809,11 @@ class ParaRouterPlugin extends Plugin {
       const tail = next === -1 ? '' : rest.slice(next).replace(/^\s*/, '');
       return text.slice(0, index).replace(/\s*$/, '') + '\n\n' + heading + '\n\n' + block + '\n' + (tail ? '\n' + tail : '\n');
     }
+    const beforeTodo = text.indexOf('### 今日待办');
     const beforeSchedule = text.indexOf('### 今日安排');
-    if (beforeSchedule !== -1) {
-      return text.slice(0, beforeSchedule).replace(/\s*$/, '') + '\n\n' + heading + '\n\n' + block + '\n\n' + text.slice(beforeSchedule);
+    const insertAt = beforeTodo !== -1 ? beforeTodo : beforeSchedule;
+    if (insertAt !== -1) {
+      return text.slice(0, insertAt).replace(/\s*$/, '') + '\n\n' + heading + '\n\n' + block + '\n\n' + text.slice(insertAt);
     }
     return text.replace(/\s*$/, '') + '\n\n' + heading + '\n\n' + block + '\n';
   }
