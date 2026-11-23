@@ -11,7 +11,8 @@ const {
   Menu,
   TFile,
   TFolder,
-  FuzzySuggestModal
+  FuzzySuggestModal,
+  Platform
 } = require('obsidian');
 
 const DEFAULT_SETTINGS = {
@@ -675,6 +676,8 @@ class ParaActionsView extends ItemView {
     const savePresetBtn = buttonRow.createEl('button', { cls: 'qsection-report-button', text: '保存到专注集' });
     const miniBtn = buttonRow.createEl('button', { cls: 'qsection-report-button', text: '小窗' });
     miniBtn.addEventListener('click', () => this.plugin.showFocusMini());
+    const popoutBtn = buttonRow.createEl('button', { cls: 'qsection-report-button', text: '桌面小窗' });
+    popoutBtn.addEventListener('click', () => { void this.plugin.showFocusPopout(); });
     savePresetBtn.addEventListener('click', () => {
       const minutes = this.plugin.focusMode === 'countdown' ? Math.round(this.plugin.focusDuration / 60) : 0;
       void this.plugin.addFocusPreset(this.plugin.focusName, minutes, this.plugin.focusMode).then((preset) => {
@@ -688,7 +691,8 @@ class ParaActionsView extends ItemView {
     pauseBtn.addEventListener('click', () => this.plugin.pauseFocusTimer());
     finishBtn.addEventListener('click', () => { void this.plugin.finishFocusTimer(false); });
     resetBtn.addEventListener('click', () => this.plugin.resetFocusTimer());
-    card.createDiv({ cls: 'qsection-report-muted qsection-focus-hint', text: '暂停后可点「继续」；完整统计在 Q 截面 → 节奏 → 专注' });
+    card.createDiv({ cls: 'qsection-report-muted qsection-focus-hint', text: '开始后自动打开桌面小窗；暂停后可点「继续」；完整统计在 Q 截面 → 节奏 → 专注' });
+    card.createDiv({ cls: 'qsection-report-muted qsection-focus-hint', text: '「小窗」打开 Obsidian 内浮层；桌面小窗可拖到副屏，置顶用窗口内按钮或 PowerToys Win+Ctrl+T。' });
 
     this.focusRefs = {
       time: timeEl,
@@ -1240,6 +1244,170 @@ class ParaActionsView extends ItemView {
       this.segmentFrame = null;
       paintSegmentPills(this.contentEl, this.segmentStore);
     });
+  }
+}
+
+class QSectionFocusWindowView extends ItemView {
+  constructor(leaf, plugin) {
+    super(leaf);
+    this.plugin = plugin;
+    this.focusWindowRefs = null;
+  }
+
+  getViewType() { return 'qsection-focus-window'; }
+  getDisplayText() { return 'Q 专注'; }
+  getIcon() { return 'timer'; }
+
+  async onOpen() {
+    this.contentEl.addClass('qsection-focus-mini', 'qsection-focus-popout');
+    this.plugin.applyThemeClass(this.contentEl);
+
+    const head = this.contentEl.createDiv({ cls: 'qsection-focus-mini-head qsection-focus-popout-head' });
+    const title = head.createSpan({ cls: 'qsection-focus-mini-title', text: '专注' });
+    const pin = head.createEl('button', {
+      cls: 'qsection-focus-mini-close qsection-focus-popout-pin',
+      text: '置顶',
+      attr: { type: 'button', title: '窗口置顶' }
+    });
+    const time = this.contentEl.createDiv({ cls: 'qsection-focus-mini-time', text: '25:00' });
+    const status = this.contentEl.createDiv({ cls: 'qsection-focus-mini-status', text: '未开始' });
+    const progress = this.contentEl.createDiv({ cls: 'qsection-focus-mini-progress' });
+    const progressFill = progress.createDiv({ cls: 'qsection-focus-mini-progress-fill' });
+    const actions = this.contentEl.createDiv({ cls: 'qsection-focus-mini-actions' });
+    const toggle = actions.createEl('button', { text: '开始', attr: { type: 'button' } });
+    const finish = actions.createEl('button', { text: '结束', attr: { type: 'button' } });
+    const consoleBtn = actions.createEl('button', { text: '操作台', attr: { type: 'button' } });
+
+    this.focusWindowRefs = { title, pin, time, status, progressFill, toggle, finish };
+
+    pin.addEventListener('click', () => this.togglePin());
+    toggle.addEventListener('click', () => {
+      if (this.plugin.focusStatus === 'running') this.plugin.pauseFocusTimer();
+      else this.plugin.startFocusTimer();
+    });
+    finish.addEventListener('click', () => { void this.plugin.finishFocusTimer(false); });
+    consoleBtn.addEventListener('click', () => { void this.plugin.activateActionsView(); });
+
+    this.registerEvent(this.app.workspace.on('qsection:focus-changed', () => this.update()));
+    this.registerEvent(this.app.workspace.on('qsection:theme-changed', () => {
+      this.plugin.applyThemeClass(this.contentEl);
+      this.update();
+    }));
+    this.registerInterval(window.setInterval(() => this.update(), 1000));
+    this.update();
+    window.setTimeout(() => this.applyWindowLayout(), 0);
+  }
+
+  async onClose() {
+    this.focusWindowRefs = null;
+    this.contentEl.empty();
+  }
+
+  focusWindow() {
+    return this.contentEl.win || (this.contentEl.ownerDocument && this.contentEl.ownerDocument.defaultView) || null;
+  }
+
+  applyWindowLayout() {
+    if (!this.focusWindowRefs) return;
+    const win = this.focusWindow();
+    const electronWindow = win && win.electronWindow;
+    if (!electronWindow) return;
+    try {
+      if (typeof electronWindow.setContentSize === 'function') {
+        electronWindow.setContentSize(240, 240);
+      } else if (typeof electronWindow.setSize === 'function') {
+        electronWindow.setSize(240, 240);
+      }
+    } catch (err) {}
+    this.setPinned(true);
+    window.setTimeout(() => this.positionTopRight(), 120);
+  }
+
+  positionTopRight() {
+    if (!this.focusWindowRefs) return;
+    const win = this.focusWindow();
+    const electronWindow = win && win.electronWindow;
+    if (!electronWindow) return;
+    const screenInfo = win.screen || {};
+    const availLeft = Number.isFinite(screenInfo.availLeft) ? screenInfo.availLeft : 0;
+    const availTop = Number.isFinite(screenInfo.availTop) ? screenInfo.availTop : 0;
+    const availWidth = Number.isFinite(screenInfo.availWidth) ? screenInfo.availWidth : (win.innerWidth || 0);
+    const margin = 8;
+    const width = (Number.isFinite(win.outerWidth) && win.outerWidth > 0 && win.outerWidth < 500) ? win.outerWidth : 254;
+    const x = Math.round(availLeft + availWidth - width - margin);
+    const y = Math.round(availTop + margin);
+    try {
+      if (typeof electronWindow.setPosition === 'function') {
+        electronWindow.setPosition(x, y);
+      } else if (typeof electronWindow.setBounds === 'function') {
+        const bounds = electronWindow.getBounds();
+        electronWindow.setBounds({ x, y, width: bounds.width, height: bounds.height });
+      }
+    } catch (err) {}
+  }
+
+  setPinned(pinned) {
+    const win = this.focusWindow();
+    const electronWindow = win && win.electronWindow;
+    if (!electronWindow || typeof electronWindow.setAlwaysOnTop !== 'function') return false;
+    try {
+      if (typeof electronWindow.isMaximized === 'function' && electronWindow.isMaximized()) return false;
+      electronWindow.setAlwaysOnTop(!!pinned);
+      this.updatePinButton();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  togglePin() {
+    const win = this.focusWindow();
+    const electronWindow = win && win.electronWindow;
+    if (!electronWindow || typeof electronWindow.setAlwaysOnTop !== 'function') {
+      new Notice('Q-Section: 当前环境不支持窗口置顶，可用 PowerToys Always On Top。');
+      return;
+    }
+    if (typeof electronWindow.isMaximized === 'function' && electronWindow.isMaximized()) {
+      new Notice('Q-Section: 窗口最大化时不能置顶，请先还原窗口。');
+      return;
+    }
+    const pinned = typeof electronWindow.isAlwaysOnTop === 'function' && electronWindow.isAlwaysOnTop();
+    if (!this.setPinned(!pinned)) {
+      new Notice('Q-Section: 置顶失败，可用 PowerToys Always On Top。');
+    }
+  }
+
+  update() {
+    if (!this.focusWindowRefs) return;
+    const refs = this.focusWindowRefs;
+    const snap = this.plugin.getFocusSnapshot();
+    refs.title.textContent = snap.name || '专注';
+    refs.time.textContent = this.plugin.formatFocusClock(snap.displaySeconds);
+    const statusText = { idle: '未开始', running: '进行中', paused: '已暂停', done: '已完成' }[snap.status] || '未开始';
+    refs.status.textContent = statusText + ' · ' + (snap.mode === 'stopwatch' ? '正计时' : '倒计时');
+    refs.progressFill.style.width = Math.round(snap.progress * 100) + '%';
+    refs.toggle.textContent = snap.status === 'running' ? '暂停' : snap.status === 'paused' ? '继续' : snap.status === 'done' ? '再来一轮' : '开始';
+    refs.finish.disabled = !(snap.status === 'running' || snap.status === 'paused');
+    this.updatePinButton();
+  }
+
+  updatePinButton() {
+    const refs = this.focusWindowRefs;
+    if (!refs || !refs.pin) return;
+    const win = this.focusWindow();
+    const electronWindow = win && win.electronWindow;
+    if (!electronWindow || typeof electronWindow.setAlwaysOnTop !== 'function') {
+      refs.pin.style.display = 'none';
+      return;
+    }
+    refs.pin.style.display = '';
+    let pinned = false;
+    try {
+      pinned = typeof electronWindow.isAlwaysOnTop === 'function' && electronWindow.isAlwaysOnTop();
+    } catch (err) {
+      pinned = false;
+    }
+    refs.pin.textContent = pinned ? '取消置顶' : '置顶';
   }
 }
 
@@ -2560,6 +2728,7 @@ class ParaRouterPlugin extends Plugin {
     await this.loadSettings();
     await this.loadRules();
     this.timers = new Map();
+    this.focusWindowOpening = false;
     this.initFocusTimer();
     this.themeObserver = new MutationObserver(() => {
       if (this.settings.themeMode === 'auto') this.app.workspace.trigger('qsection:theme-changed');
@@ -2569,6 +2738,7 @@ class ParaRouterPlugin extends Plugin {
 
     this.registerView('qsection-actions', (leaf) => new ParaActionsView(leaf, this));
     this.registerView('qsection-report', (leaf) => new QSectionReportView(leaf, this));
+    this.registerView('qsection-focus-window', (leaf) => new QSectionFocusWindowView(leaf, this));
 
     this.registerEvent(this.app.vault.on('create', (file) => this.schedule(file)));
     this.registerEvent(this.app.metadataCache.on('changed', (file) => this.schedule(file)));
@@ -2603,6 +2773,11 @@ class ParaRouterPlugin extends Plugin {
       id: 'open-focus-timer',
       name: 'Open focus timer',
       callback: () => { void this.activateActionsView(); }
+    });
+    this.addCommand({
+      id: 'open-focus-window',
+      name: 'Open focus desktop window',
+      callback: () => { void this.showFocusPopout(); }
     });
     this.addCommand({
       id: 'open-checkin',
@@ -2721,6 +2896,7 @@ class ParaRouterPlugin extends Plugin {
     this.destroyFocusMini();
     this.app.workspace.detachLeavesOfType('qsection-actions');
     this.app.workspace.detachLeavesOfType('qsection-report');
+    this.app.workspace.detachLeavesOfType('qsection-focus-window');
   }
 
   async loadSettings() {
@@ -2745,13 +2921,14 @@ class ParaRouterPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  resolvedThemeMode() {
+  resolvedThemeMode(el) {
     if (this.settings.themeMode === 'light' || this.settings.themeMode === 'dark') return this.settings.themeMode;
-    return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+    const doc = el && (el.doc || el.ownerDocument) || document;
+    return doc.body && doc.body.classList.contains('theme-dark') ? 'dark' : 'light';
   }
 
   applyThemeClass(el) {
-    const theme = this.resolvedThemeMode();
+    const theme = this.resolvedThemeMode(el);
     el.classList.remove('qsection-theme-light', 'qsection-theme-dark');
     el.classList.add('qsection-theme-' + theme);
     el.classList.toggle('qsection-glass', !!this.settings.glassTheme);
@@ -3584,6 +3761,48 @@ class ParaRouterPlugin extends Plugin {
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 
+  async showFocusPopout() {
+    if (!Platform.isDesktopApp) {
+      new Notice('Q-Section: 桌面小窗只在桌面版 Obsidian 可用。');
+      return;
+    }
+    if (typeof this.app.workspace.openPopoutLeaf !== 'function') {
+      new Notice('Q-Section: 当前 Obsidian 版本不支持独立窗口。');
+      this.showFocusMini();
+      return;
+    }
+    const existing = this.app.workspace.getLeavesOfType('qsection-focus-window');
+    if (existing.length) {
+      await existing[0].loadIfDeferred?.();
+      const view = existing[0].view;
+      if (view && typeof view.applyWindowLayout === 'function') view.applyWindowLayout();
+      this.app.workspace.revealLeaf(existing[0]);
+      return;
+    }
+    if (this.focusWindowOpening) return;
+    this.focusWindowOpening = true;
+    let leaf = null;
+    try {
+      const screenInfo = (typeof window !== 'undefined' && window.screen) ? window.screen : {};
+      const margin = 8;
+      const init = { size: { width: 240, height: 240 } };
+      if (Number.isFinite(screenInfo.availWidth) && screenInfo.availWidth > 0) {
+        const availLeft = Number.isFinite(screenInfo.availLeft) ? screenInfo.availLeft : 0;
+        const availTop = Number.isFinite(screenInfo.availTop) ? screenInfo.availTop : 0;
+        init.x = Math.round(availLeft + screenInfo.availWidth - 254 - margin);
+        init.y = Math.round(availTop + margin);
+      }
+      leaf = this.app.workspace.openPopoutLeaf(init);
+      await leaf.setViewState({ type: 'qsection-focus-window', active: true });
+    } catch (err) {
+      if (leaf) leaf.detach();
+      new Notice('Q-Section: 打开桌面小窗失败：' + (err && err.message ? err.message : err));
+      this.showFocusMini();
+    } finally {
+      this.focusWindowOpening = false;
+    }
+  }
+
   showFocusMini() {
     if (this.focusMiniEl) {
       this.focusMiniEl.style.display = 'flex';
@@ -3721,7 +3940,13 @@ class ParaRouterPlugin extends Plugin {
     if (this.focusStatus === 'running') {
       this.startFocusClock();
       window.setTimeout(() => this.tickFocusClock(), 1000);
-      window.setTimeout(() => this.showFocusMini(), 800);
+      this.app.workspace.onLayoutReady(() => {
+        window.setTimeout(() => {
+          if (this.focusStatus !== 'running') return;
+          if (Platform.isDesktopApp) void this.showFocusPopout();
+          else this.showFocusMini();
+        }, 300);
+      });
     }
   }
 
@@ -3870,7 +4095,8 @@ class ParaRouterPlugin extends Plugin {
     this.startFocusClock();
     this.persistFocusTimer();
     this.emitFocusChanged();
-    this.showFocusMini();
+    if (Platform.isDesktopApp) void this.showFocusPopout();
+    else this.showFocusMini();
   }
 
   pauseFocusTimer() {
@@ -4308,20 +4534,73 @@ class ParaRouterPlugin extends Plugin {
     ].join('\n');
   }
 
+  scheduleStartMinutes(block) {
+    const match = String(block || '').match(/\[startTime::\s*(\d{1,2}):(\d{2})\]/);
+    if (!match) return null;
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes) || hours > 23 || minutes > 59) return null;
+    return hours * 60 + minutes;
+  }
+
+  splitScheduleBlocks(content) {
+    const prefix = [];
+    const blocks = [];
+    let current = null;
+    for (const line of String(content || '').split('\n')) {
+      if (/^- /.test(line)) {
+        if (current) blocks.push(current);
+        current = [line];
+      } else if (current) {
+        current.push(line);
+      } else {
+        prefix.push(line);
+      }
+    }
+    if (current) blocks.push(current);
+    return { prefix, blocks };
+  }
+
+  sortScheduleBlocks(blocks) {
+    const timed = [];
+    blocks.forEach((block, index) => {
+      const minutes = this.scheduleStartMinutes(block.join('\n'));
+      if (minutes !== null) timed.push({ block, index, minutes });
+    });
+    if (timed.length < 2) return blocks;
+    const sorted = timed.slice().sort((a, b) => (a.minutes - b.minutes) || (a.index - b.index));
+    const result = blocks.slice();
+    timed.forEach((item, index) => {
+      result[item.index] = sorted[index].block;
+    });
+    return result;
+  }
+
   insertDailyFocusEvent(text, line) {
     const heading = '### 今日安排';
     const index = text.indexOf(heading);
     if (index === -1) {
-      return text.replace(/\s*$/, '') + '\n\n' + heading + '\n\n' + line + '\n';
+      const extra = String(line || '').trim();
+      return text.replace(/\s*$/, '') + '\n\n' + heading + '\n\n' + (extra ? extra + '\n' : '');
     }
     const after = index + heading.length;
     const rest = text.slice(after);
     const next = rest.search(/\n#{2,3}\s/);
-    const insertAt = next === -1 ? text.length : after + next;
-    const before = text.slice(0, insertAt).replace(/\s*$/, '');
-    const afterText = text.slice(insertAt).replace(/^\s*/, '');
-    const separator = before.endsWith(heading) ? '\n\n' : '\n';
-    return before + separator + line + '\n' + (afterText ? '\n' + afterText : '\n');
+    const body = next === -1 ? rest : rest.slice(0, next);
+    const tail = next === -1 ? '' : rest.slice(next);
+    const parsed = this.splitScheduleBlocks(String(body || '').trim());
+    const blocks = parsed.blocks.slice();
+    const extra = String(line || '').trim();
+    if (extra) {
+      const extraParsed = this.splitScheduleBlocks(extra);
+      blocks.push(...extraParsed.blocks);
+    }
+    const sorted = this.sortScheduleBlocks(blocks);
+    const rebuilt = parsed.prefix.concat(sorted.map((block) => block.join('\n'))).join('\n');
+    const before = text.slice(0, after).replace(/\s*$/, '');
+    const tailText = tail.replace(/^\s*/, '');
+    const section = rebuilt ? '\n\n' + rebuilt + '\n' : '\n';
+    return before + section + (tailText ? '\n' + tailText : '\n');
   }
 
   async ensureDailyNoteFile(date) {
