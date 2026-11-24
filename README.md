@@ -39,7 +39,7 @@ Install: copy the three files into `<your vault>/.obsidian/plugins/qsection/`, r
 
 ## Q-Section 插件 / The Q-Section plugin
 
-当前版本 **0.15.20**。Current version: **0.15.20**.
+当前版本 **0.15.22**。Current version: **0.15.22**.
 
 它是自建的 Obsidian 插件，包含四部分：
 
@@ -65,6 +65,8 @@ The focus desktop window is an Obsidian popout. On desktop it opens automaticall
 
 ### 更新记录 / Changelog
 
+- **0.15.22**：新建领域自动创建 `02_Areas/<领域>/` 文件夹、主领域笔记，以及 `关联笔记 / 关联任务 / 关联项目` 三篇视图子笔记；主笔记 `routing: false`，不会被自动路由移出文件夹。不生成「关联剪藏」。
+- **0.15.21**：速记转化新增「明日任务」（任务进 `08_Tasks/每日任务`，创建时间为明天 00:00，写入明天日笔记 `### 今日待办`）；任务新增 `关联领域` 字段和 Q 操作台「关联领域」按钮；Q 操作台重绘保留滚动位置。
 - **0.15.20**：修复 0.15.19 模板加引号后，Q-Section 生成的日志 `date` 变成字符串、属性面板不显示日期控件的问题；`renderTemplate()` 渲染 frontmatter 时去掉日期占位符引号，周 / 月 / 季 / 年字段保持文本。
 - **0.15.19**：速记转任务不设截止日期时进入 `08_Tasks/每日任务`，并追加到今天日笔记 `### 今日待办`；补截止日期后回 `08_Tasks/Todo`。日笔记模板 / 脚手架新增 `### 今日待办`；五个日志模板日期占位符加引号，修复周 / 季（及日 / 月 / 年）属性不显示。
 - **0.15.18**：Q 截面 → 输入 → 收集：移除「近 12 周」速记热力图，改为「随机速记」卡片；只抽未转化为笔记 / 任务 / 项目的速记，可换一条或打开来源日笔记。
@@ -91,6 +93,8 @@ The focus desktop window is an Obsidian popout. On desktop it opens automaticall
 - **0.11.1**：修复 Q 操作台「新建」对象的路径生成错误；修复 resource 在没有 `note_kind` 时被放入 `<Topic>/Other`、而不是主题根目录的问题。
 - **0.11.0**：Q 截面六模块、Q 操作台、自动路由。
 
+- **0.15.22**: creating an area now builds `02_Areas/<area>/` with the main area note plus three view notes (related notes / tasks / projects); the main note has `routing: false` and stays in its folder. No "related clips" note is created.
+- **0.15.21**: quick capture gained a "Tomorrow task" conversion (the task goes to `08_Tasks/每日任务`, created time tomorrow 00:00, and is appended to tomorrow's `### 今日待办`); tasks gained a `关联领域` field and a Q console "Link area" button; the Q console now preserves scroll position on re-render.
 - **0.15.20**: fixed the 0.15.19 regression where quoted journal templates made the generated journal's `date` a string and hid the date control; `renderTemplate()` now strips the quotes from date placeholders in frontmatter, while week/month/quarter/year stay text.
 - **0.15.19**: undated capture-to-task conversions now go to `08_Tasks/每日任务` and are appended to the `### 今日待办` section of today's daily note; adding a due date later moves the task back to `08_Tasks/Todo`. The daily note template/scaffold gained `### 今日待办`; the five journal templates quote their date placeholders to fix missing properties on weekly/quarterly (and daily/monthly/yearly) journals.
 - **0.15.18**: the Q view's Input → Capture page replaces the 12-week capture heatmap with a random capture card; it draws only captures not yet converted to a note, task or project, and can draw again or open the source daily note.

@@ -480,6 +480,8 @@ class ParaActionsView extends ItemView {
     if (project) meta.createSpan({ text: 'project: ' + project });
     const area = this.plugin.linkName(textValue(fm.area));
     if (area) meta.createSpan({ text: 'area: ' + area });
+    const taskArea = this.plugin.linkName(textValue(fm['关联领域']));
+    if (taskArea) meta.createSpan({ text: '关联领域: ' + taskArea });
 
     const open = (name) => { if (name) void this.app.workspace.openLinkText(name, '', true); };
     const relationButtons = () => [
@@ -492,7 +494,8 @@ class ParaActionsView extends ItemView {
       const buttons = [
         ['完成当前对象', () => this.plugin.completeCurrentObject()],
         ['设置截止', () => this.promptTaskDueDate(file, fm)],
-        ['关联项目', () => this.plugin.startRelation('project')]
+        ['关联项目', () => this.plugin.startRelation('project')],
+        ['关联领域', () => this.plugin.startRelation('area')]
       ];
       if (project) buttons.push(['打开项目', () => open(project)]);
       this.buttonRow(section, buttons);
@@ -888,6 +891,7 @@ class ParaActionsView extends ItemView {
           const menu = new Menu();
           menu.addItem((item) => item.setTitle('转为笔记').onClick(() => { void this.convertCapture(capture, 'note'); }));
           menu.addItem((item) => item.setTitle('转为任务').onClick(() => { void this.convertCapture(capture, 'task'); }));
+          menu.addItem((item) => item.setTitle('明日任务').onClick(() => { void this.convertCapture(capture, 'task', { tomorrow: true }); }));
           menu.addItem((item) => item.setTitle('转为项目').onClick(() => { void this.convertCapture(capture, 'project'); }));
           menu.showAtMouseEvent(event);
           styleQMenu(menu, this.plugin);
@@ -916,12 +920,13 @@ class ParaActionsView extends ItemView {
     return '笔记';
   }
 
-  async convertCapture(capture, type) {
+  async convertCapture(capture, type, options = {}) {
     if (this.captureBusy) return;
     this.captureBusy = true;
     try {
-      const file = await this.plugin.convertQuickCapture(capture, type);
-      new Notice(`Q-Section: 已转为${this.captureTypeLabel(type)}：${file.basename}`);
+      const file = await this.plugin.convertQuickCapture(capture, type, options);
+      const label = options.tomorrow ? '明日任务' : this.captureTypeLabel(type);
+      new Notice(`Q-Section: 已转为${label}：${file.basename}`);
       this.render();
     } catch (err) {
       new Notice('Q-Section: 转化失败：' + (err && err.message ? err.message : err));
@@ -1151,6 +1156,7 @@ class ParaActionsView extends ItemView {
 
   render() {
     const root = this.contentEl;
+    const scroll = root.scrollTop;
     root.empty();
     root.addClass('qsection-actions');
     this.plugin.applyThemeClass(root);
@@ -1234,6 +1240,7 @@ class ParaActionsView extends ItemView {
       ['路由规则', () => { void this.app.workspace.openLinkText('06_System/router-rules.json', '', true); }]
     ]);
     this.paintSegments();
+    root.scrollTop = scroll;
   }
 
   paintSegments() {
@@ -2250,12 +2257,13 @@ class QSectionReportView extends ItemView {
     return '笔记';
   }
 
-  async convertCapture(capture, type) {
+  async convertCapture(capture, type, options = {}) {
     if (this.captureBusy) return;
     this.captureBusy = true;
     try {
-      const file = await this.plugin.convertQuickCapture(capture, type);
-      new Notice(`Q-Section: 已转为${this.captureTypeLabel(type)}：${file.basename}`);
+      const file = await this.plugin.convertQuickCapture(capture, type, options);
+      const label = options.tomorrow ? '明日任务' : this.captureTypeLabel(type);
+      new Notice(`Q-Section: 已转为${label}：${file.basename}`);
       this.render();
     } catch (err) {
       new Notice('Q-Section: 转化失败：' + (err && err.message ? err.message : err));
@@ -3249,6 +3257,7 @@ class ParaRouterPlugin extends Plugin {
     const link = `[[${targetFile.path}|${targetFile.basename}]]`;
     let field = null;
     if (kind === 'area' && sourceType === 'project') field = 'area';
+    if (kind === 'area' && sourceType === 'task') field = '关联领域';
     if (kind === 'project' && (sourceType === 'task' || sourceType === 'content')) field = 'project';
 
     if (field) {
@@ -3597,6 +3606,9 @@ class ParaRouterPlugin extends Plugin {
     }
     let content = await this.app.vault.read(templateFile);
     content = this.renderTemplate(content, title);
+    if (kind === 'area') {
+      return this.createAreaWithViews(title, content);
+    }
     const folder = this.initialFolder(kind);
     await this.ensureFolder(folder);
     const path = await this.uniquePath(folder + '/' + this.safeName(title) + '.md');
@@ -3604,6 +3616,97 @@ class ParaRouterPlugin extends Plugin {
     await this.app.workspace.getLeaf(true).openFile(file);
     new Notice('Q-Section: created ' + path);
     return file;
+  }
+
+  async createAreaWithViews(title, content) {
+    const base = this.safeName(title);
+    const folder = '02_Areas/' + base;
+    await this.ensureFolder(folder);
+    const path = await this.uniquePath(folder + '/' + base + '.md');
+    const file = await this.app.vault.create(path, content);
+    await this.createAreaViewNotes(folder, file);
+    await this.app.workspace.getLeaf(true).openFile(file);
+    new Notice('Q-Section: created ' + path);
+    return file;
+  }
+
+  async createAreaViewNotes(folder, areaFile) {
+    const areaPath = areaFile.path.replace(/\.md$/i, '');
+    const areaName = areaFile.basename;
+    const link = 'link(' + JSON.stringify(areaPath) + ')';
+    const views = [
+      {
+        suffix: '关联笔记',
+        intro: '笔记的 `area` 指向本领域，或正文链接到本领域时，会自动出现在下表。',
+        filters: [
+          '    - file.hasLink(' + link + ')',
+          '    - or:',
+          '        - note["type"] == "note"',
+          '        - note["type"] == "resource"',
+          '        - note["type"] == "content"',
+          '    - or:',
+          '        - file.inFolder("03_Resources")',
+          '        - file.inFolder("05_Content")',
+          '        - file.path == "06_System/账号资料.md"'
+        ],
+        columns: ['file.name', 'note_kind', 'topic'],
+        sort: 'file.name'
+      },
+      {
+        suffix: '关联任务',
+        intro: '把任务的 `关联领域` 指向本领域，或正文链接本领域，就会出现在下表。',
+        filters: [
+          '    - file.hasLink(' + link + ')',
+          '    - note["type"] == "task"'
+        ],
+        columns: ['file.name', 'status', '截止', 'project'],
+        sort: 'status'
+      },
+      {
+        suffix: '关联项目',
+        intro: '项目的 `area` 指向本领域，或正文链接到本领域时，会自动出现在下表。',
+        filters: [
+          '    - file.hasLink(' + link + ')',
+          '    - note["type"] == "project"'
+        ],
+        columns: ['file.name', 'status', '目标', '完成定义'],
+        sort: 'status'
+      }
+    ];
+    for (const view of views) {
+      const name = areaName + ' - ' + view.suffix;
+      const path = await this.uniquePath(folder + '/' + name + '.md');
+      const body = [
+        '---',
+        'type: note',
+        'note_kind: 领域视图',
+        'routing: false',
+        'tags: []',
+        '---',
+        '',
+        '# ' + name,
+        '',
+        '> ' + view.intro,
+        '',
+        '```base',
+        'filters:',
+        '  and:',
+        '    - file.ext == "md"',
+        ...view.filters,
+        'views:',
+        '  - type: table',
+        '    name: ' + view.suffix,
+        '    limit: 50',
+        '    order:',
+        ...view.columns.map((column) => '      - ' + column),
+        '    sort:',
+        '      - property: ' + view.sort,
+        '        direction: ASC',
+        '```',
+        ''
+      ].join('\n');
+      await this.app.vault.create(path, body);
+    }
   }
 
   openBase(name) {
@@ -4455,15 +4558,18 @@ class ParaRouterPlugin extends Plugin {
     });
   }
 
-  async convertQuickCapture(capture, type) {
+  async convertQuickCapture(capture, type, options = {}) {
     const title = this.safeFileName(capture.text.split('\n')[0]);
     const source = `\n\n> 来源：[[${capture.path}]]`;
-    const created = window.moment().format('YYYY-MM-DD HH:mm');
+    const now = window.moment();
+    const tomorrow = !!(options && options.tomorrow);
+    const targetDate = tomorrow ? now.clone().add(1, 'day') : now;
+    const created = tomorrow ? `${targetDate.format('YYYY-MM-DD')} 00:00` : now.format('YYYY-MM-DD HH:mm');
     let folder = '03_Resources/Other/Notes/速记';
     let frontmatter = ['---', 'type: note', 'note_kind: 速记', 'topic: other', `创建时间: ${created}`, 'tags: []', '---'];
     let taskDue = '';
     if (type === 'task') {
-      taskDue = await this.promptTaskDueDate();
+      taskDue = tomorrow ? '' : await this.promptTaskDueDate();
       folder = taskDue ? '08_Tasks/Todo' : '08_Tasks/每日任务';
       const dueLine = taskDue ? `截止: ${taskDue}` : '截止:';
       frontmatter = ['---', 'type: task', 'status: todo', 'project:', dueLine, `创建时间: ${created}`, 'tags: []', '---'];
@@ -4484,9 +4590,9 @@ class ParaRouterPlugin extends Plugin {
     await this.saveSettings();
     if (type === 'task' && !taskDue) {
       try {
-        await this.appendTodoToDailyNote(window.moment().format('YYYY-MM-DD'), `- [ ] [[${file.path.replace(/\.md$/i, '')}|${file.basename}]]`);
+        await this.appendTodoToDailyNote(targetDate.format('YYYY-MM-DD'), `- [ ] [[${file.path.replace(/\.md$/i, '')}|${file.basename}]]`);
       } catch (err) {
-        new Notice('Q-Section: 任务已建，但今日待办写入失败：' + (err && err.message ? err.message : err));
+        new Notice('Q-Section: 任务已建，但待办写入失败：' + (err && err.message ? err.message : err));
       }
     }
     await this.app.workspace.getLeaf(true).openFile(file);
