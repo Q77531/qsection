@@ -375,6 +375,8 @@ class ParaActionsView extends ItemView {
     this.favoriteBusy = false;
     this.captureToken = 0;
     this.writingToken = 0;
+    this.captureDraft = '';
+    this.draftDraft = '';
     this.quickAssistTab = 'favorites';
   }
 
@@ -822,7 +824,9 @@ class ParaActionsView extends ItemView {
     const main = layout.createDiv({ cls: 'qsection-capture-console-main' });
     const input = main.createEl('textarea', { cls: 'qsection-capture-input' });
     input.rows = 4;
+    input.value = this.captureDraft;
     input.placeholder = '记一条：想法、待查、临时资料、下一步……';
+    input.addEventListener('input', () => { this.captureDraft = input.value; });
     const actions = main.createDiv({ cls: 'qsection-actions-row' });
     const dailyBtn = actions.createEl('button', { cls: 'qsection-focus-primary', text: '存到今日日笔记' });
     const inboxBtn = actions.createEl('button', { cls: 'qsection-actions-button', text: '新建 Inbox 笔记' });
@@ -844,6 +848,7 @@ class ParaActionsView extends ItemView {
           await this.plugin.createInboxCapture(text);
           new Notice('Q-Section: 已创建 Inbox 速记。');
         }
+        this.captureDraft = '';
         input.value = '';
         this.render();
       } catch (err) {
@@ -854,7 +859,7 @@ class ParaActionsView extends ItemView {
     };
     dailyBtn.addEventListener('click', () => { void submit('daily'); });
     inboxBtn.addEventListener('click', () => { void submit('inbox'); });
-    clearBtn.addEventListener('click', () => { input.value = ''; input.focus(); });
+    clearBtn.addEventListener('click', () => { this.captureDraft = ''; input.value = ''; input.focus(); });
     input.addEventListener('keydown', (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
         event.preventDefault();
@@ -958,7 +963,9 @@ class ParaActionsView extends ItemView {
     });
     const input = section.createEl('textarea', { cls: 'qsection-capture-input qsection-draft-input' });
     input.rows = 4;
+    input.value = this.draftDraft;
     input.placeholder = '先写在这里，发送后进入草稿箱；要用时直接复制。';
+    input.addEventListener('input', () => { this.draftDraft = input.value; });
     const actions = section.createDiv({ cls: 'qsection-actions-row' });
     const send = actions.createEl('button', { cls: 'qsection-focus-primary', text: '发送到草稿箱' });
     send.disabled = !note;
@@ -976,6 +983,7 @@ class ParaActionsView extends ItemView {
       this.creationBusy = true;
       try {
         await this.plugin.addDraft(note.path, text);
+        this.draftDraft = '';
         input.value = '';
         new Notice('Q-Section: 已存入草稿箱。');
         this.render();
@@ -1154,9 +1162,41 @@ class ParaActionsView extends ItemView {
     ]);
   }
 
+  captureInputFocusState() {
+    const el = document.activeElement;
+    if (!(el instanceof HTMLElement) || !this.contentEl.contains(el)) return null;
+    const isDraft = el.classList.contains('qsection-draft-input');
+    const isCapture = el.classList.contains('qsection-capture-input');
+    if (!isDraft && !isCapture) return null;
+    return {
+      selector: isDraft ? '.qsection-draft-input' : '.qsection-capture-input',
+      start: typeof el.selectionStart === 'number' ? el.selectionStart : null,
+      end: typeof el.selectionEnd === 'number' ? el.selectionEnd : null
+    };
+  }
+
+  restoreInputFocus(state) {
+    if (!state) return;
+    window.requestAnimationFrame(() => {
+      const active = document.activeElement;
+      if (active && active !== document.body && this.contentEl.contains(active)) return;
+      const el = this.contentEl.querySelector(state.selector);
+      if (!(el instanceof HTMLTextAreaElement)) return;
+      el.focus();
+      if (state.start !== null && state.end !== null) {
+        try {
+          el.setSelectionRange(state.start, state.end);
+        } catch (err) {
+          // 输入框已不在原位置时忽略。
+        }
+      }
+    });
+  }
+
   render() {
     const root = this.contentEl;
     const scroll = root.scrollTop;
+    const focusState = this.captureInputFocusState();
     root.empty();
     root.addClass('qsection-actions');
     this.plugin.applyThemeClass(root);
@@ -1241,6 +1281,7 @@ class ParaActionsView extends ItemView {
     ]);
     this.paintSegments();
     root.scrollTop = scroll;
+    this.restoreInputFocus(focusState);
   }
 
   paintSegments() {
