@@ -3060,7 +3060,10 @@ class ParaRouterPlugin extends Plugin {
     return path.startsWith('06_System/')
       || path.startsWith('.obsidian/')
       || path.startsWith('.git/')
-      || path.startsWith('.trash/');
+      || path.startsWith('.trash/')
+      || path.startsWith('copilot/')
+      || path.startsWith('09_Sources/')
+      || path.startsWith('00_Inbox/WorkBuddy/');
   }
 
   schedule(file) {

@@ -39,7 +39,7 @@ Install: copy the three files into `<your vault>/.obsidian/plugins/qsection/`, r
 
 ## Q-Section 插件 / The Q-Section plugin
 
-当前版本 **0.15.23**。Current version: **0.15.23**.
+当前版本 **0.15.24**。Current version: **0.15.24**.
 
 它是自建的 Obsidian 插件，包含四部分：
 
@@ -65,6 +65,7 @@ The focus desktop window is an Obsidian popout. On desktop it opens automaticall
 
 ### 更新记录 / Changelog
 
+- **0.15.24**：自动路由忽略 `copilot/`、`09_Sources/`、`00_Inbox/WorkBuddy/`，避免备份任务、私有资料和 WorkBuddy 原料被误当成正式对象移动；修复备份任务被路由进 `08_Tasks` 后在 Todo / Done 留下重复文件的问题。
 - **0.15.23**：Q 操作台 / Q 截面统一 4px 间距尺度（4/8/12/16/24）、卡片内边距和按钮规格；侧栏断点改为容器查询，窄栏时速记 / 打卡 / 专注 / 速记 console 自动单列，修复打卡表单被挤成 151px、placeholder 裁字；速记和草稿在重绘 / 切笔记时保留未发送内容并恢复光标；小字改用 muted 对比色，补 2px 键盘焦点环，转化 / 删除 / 日历控件点击目标 ≥24px。
 - **0.15.22**：新建领域自动创建 `02_Areas/<领域>/` 文件夹、主领域笔记，以及 `关联笔记 / 关联任务 / 关联项目` 三篇视图子笔记；主笔记 `routing: false`，不会被自动路由移出文件夹。不生成「关联剪藏」。
 - **0.15.21**：速记转化新增「明日任务」（任务进 `08_Tasks/每日任务`，创建时间为明天 00:00，写入明天日笔记 `### 今日待办`）；任务新增 `关联领域` 字段和 Q 操作台「关联领域」按钮；Q 操作台重绘保留滚动位置。
@@ -94,6 +95,7 @@ The focus desktop window is an Obsidian popout. On desktop it opens automaticall
 - **0.11.1**：修复 Q 操作台「新建」对象的路径生成错误；修复 resource 在没有 `note_kind` 时被放入 `<Topic>/Other`、而不是主题根目录的问题。
 - **0.11.0**：Q 截面六模块、Q 操作台、自动路由。
 
+- **0.15.24**: auto-routing now ignores `copilot/`, `09_Sources/` and `00_Inbox/WorkBuddy/`, so backup tasks, private sources and WorkBuddy material are no longer treated as real objects and moved; this fixes the duplicate tasks left in Todo/Done when backed-up tasks were routed into `08_Tasks`.
 - **0.15.23**: unified 4px spacing tokens (4/8/12/16/24), card padding and button sizing across the Q console and Q view; sidebar breakpoints now use container queries, stacking capture / check-in / focus / capture-console columns on narrow rails and fixing the 151px check-in field clipping; unsent capture and draft text now survive re-render and note switches, with cursor restored; small text uses the muted contrast color, adds a 2px keyboard focus ring, and brings convert / delete / calendar targets to at least 24px.
 - **0.15.22**: creating an area now builds `02_Areas/<area>/` with the main area note plus three view notes (related notes / tasks / projects); the main note has `routing: false` and stays in its folder. No "related clips" note is created.
 - **0.15.21**: quick capture gained a "Tomorrow task" conversion (the task goes to `08_Tasks/每日任务`, created time tomorrow 00:00, and is appended to tomorrow's `### 今日待办`); tasks gained a `关联领域` field and a Q console "Link area" button; the Q console now preserves scroll position on re-render.
