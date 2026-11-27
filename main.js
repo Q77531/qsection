@@ -32,7 +32,8 @@ const DEFAULT_SETTINGS = {
   favoritePaths: [],
   drafts: [],
   writingProjects: [],
-  captureConversions: {}
+  captureConversions: {},
+  countdowns: []
 };
 
 const LOG_PATH = '06_System/审计/router-log.jsonl';
@@ -609,7 +610,7 @@ class ParaActionsView extends ItemView {
           attr: { title: '删除专注项目（不影响历史记录）' }
         });
         remove.addEventListener('click', () => {
-          if (!window.confirm(`删除专注项目「${preset.name}」？历史专注和 Full Calendar 记录不会删除。`)) return;
+          if (!window.confirm(`删除专注项目「${preset.name}」？历史专注和日笔记里的日程不会删除。`)) return;
           void this.plugin.removeFocusPreset(preset.id).then(() => this.render());
         });
       }
@@ -2720,6 +2721,1120 @@ class QSectionReportView extends ItemView {
     }
   }
 }
+class QCalendarEventModal extends Modal {
+  constructor(app, plugin, options, callbacks) {
+    super(app);
+    this.plugin = plugin;
+    this.options = options || {};
+    this.callbacks = callbacks || {};
+    this.saving = false;
+  }
+
+  onOpen() {
+    decorateQModal(this);
+    const root = this.contentEl;
+    root.empty();
+    root.addClass('qsection-calendar-form-modal');
+    this.plugin.applyThemeClass(root);
+
+    const event = this.options.event || null;
+    const editing = !!event;
+    root.createEl('h2', { text: editing ? '编辑日程' : '新建日程' });
+    if (editing && event.focusRecord) {
+      root.createEl('p', {
+        cls: 'qsection-calendar-form-hint',
+        text: '这是 Q 专注写入的日笔记记录；修改或删除只改日笔记，不影响专注统计。'
+      });
+    }
+
+    const form = root.createDiv({ cls: 'qsection-calendar-form' });
+    const titleField = form.createEl('label', { cls: 'qsection-calendar-field' });
+    titleField.createSpan({ text: '标题' });
+    const titleInput = titleField.createEl('input', { type: 'text', cls: 'qsection-actions-input' });
+    titleInput.value = event ? event.title : '';
+    titleInput.placeholder = '日程标题';
+
+    const dateField = form.createEl('label', { cls: 'qsection-calendar-field' });
+    dateField.createSpan({ text: '日期' });
+    const dateInput = dateField.createEl('input', { type: 'date', cls: 'qsection-actions-input' });
+    dateInput.value = event ? event.date : (this.options.date || window.moment().format('YYYY-MM-DD'));
+
+    const allDayField = form.createEl('label', { cls: 'qsection-calendar-field qsection-calendar-field-inline' });
+    const allDayInput = allDayField.createEl('input', { type: 'checkbox' });
+    allDayField.createSpan({ text: '全天' });
+    allDayInput.checked = event ? !!event.allDay : !!this.options.allDay;
+
+    const timeRow = form.createDiv({ cls: 'qsection-calendar-time-row' });
+    const startField = timeRow.createEl('label', { cls: 'qsection-calendar-field' });
+    startField.createSpan({ text: '开始' });
+    const startInput = startField.createEl('input', { type: 'time', cls: 'qsection-actions-input' });
+    const endField = timeRow.createEl('label', { cls: 'qsection-calendar-field' });
+    endField.createSpan({ text: '结束' });
+    const endInput = endField.createEl('input', { type: 'time', cls: 'qsection-actions-input' });
+
+    const rawStart = event && !event.allDay ? event.startMinute : this.options.startMinute;
+    const rawEnd = event && !event.allDay ? event.endMinute : this.options.endMinute;
+    const initialStart = Number.isFinite(Number(rawStart)) ? Number(rawStart) : 9 * 60;
+    const initialEnd = Number.isFinite(Number(rawEnd)) ? Number(rawEnd) : initialStart + 60;
+    startInput.value = this.minutesLabel(initialStart);
+    endInput.value = this.minutesLabel(initialEnd);
+
+    const locationField = form.createEl('label', { cls: 'qsection-calendar-field' });
+    locationField.createSpan({ text: '地点' });
+    const locationInput = locationField.createEl('input', { type: 'text', cls: 'qsection-actions-input' });
+    locationInput.value = event ? (event.location || '') : '';
+    locationInput.placeholder = '可选';
+
+    const syncAllDay = () => {
+      const disabled = allDayInput.checked;
+      startInput.disabled = disabled;
+      endInput.disabled = disabled;
+      timeRow.classList.toggle('is-disabled', disabled);
+    };
+    allDayInput.addEventListener('change', syncAllDay);
+    syncAllDay();
+
+    const actions = root.createDiv({ cls: 'qsection-actions-modal-row qsection-calendar-form-actions' });
+    if (editing) {
+      const openDaily = actions.createEl('button', {
+        cls: 'qsection-calendar-open-daily',
+        text: '打开日笔记',
+        attr: { type: 'button', title: '打开这条日程所在日期的日笔记' }
+      });
+      openDaily.addEventListener('click', async () => {
+        const path = `07_Journal/Daily/${event.date.slice(0, 4)}/${event.date}.md`;
+        if (!this.app.vault.getAbstractFileByPath(path)) {
+          new Notice('Q-Section: 这一天还没有日笔记。');
+          return;
+        }
+        await this.app.workspace.openLinkText(path, '', true);
+        this.close();
+      });
+      const remove = actions.createEl('button', { cls: 'qsection-calendar-delete', text: '删除' });
+      remove.addEventListener('click', async () => {
+        if (this.saving || !this.callbacks.onDelete) return;
+        if (!window.confirm('删除这条日程？')) return;
+        this.saving = true;
+        remove.disabled = true;
+        try {
+          await this.callbacks.onDelete();
+          this.close();
+        } catch (err) {
+          this.saving = false;
+          remove.disabled = false;
+          new Notice('Q-Section: 删除失败：' + (err && err.message ? err.message : err));
+        }
+      });
+    }
+    const cancel = actions.createEl('button', { text: '取消' });
+    cancel.addEventListener('click', () => this.close());
+    const save = actions.createEl('button', { text: '保存', cls: 'mod-cta' });
+
+    const submit = async () => {
+      if (this.saving || !this.callbacks.onSave) return;
+      const title = titleInput.value.replace(/\s+/g, ' ').trim();
+      if (!title) {
+        new Notice('Q-Section: 日程标题不能为空。');
+        titleInput.focus();
+        return;
+      }
+      const date = String(dateInput.value || '').trim();
+      if (!window.moment(date, 'YYYY-MM-DD', true).isValid()) {
+        new Notice('Q-Section: 请选择有效日期。');
+        dateInput.focus();
+        return;
+      }
+      const allDay = allDayInput.checked;
+      const start = String(startInput.value || '').trim();
+      const end = String(endInput.value || '').trim();
+      if (!allDay) {
+        if (!/^\d{2}:\d{2}$/.test(start) || !/^\d{2}:\d{2}$/.test(end)) {
+          new Notice('Q-Section: 请填写开始和结束时间。');
+          return;
+        }
+        if (end <= start) {
+          new Notice('Q-Section: 结束时间要晚于开始时间。');
+          endInput.focus();
+          return;
+        }
+      }
+      this.saving = true;
+      save.disabled = true;
+      try {
+        await this.callbacks.onSave({
+          title,
+          date,
+          allDay,
+          start: allDay ? '' : start,
+          end: allDay ? '' : end,
+          location: locationInput.value.replace(/\s+/g, ' ').trim(),
+          event
+        });
+        this.close();
+      } catch (err) {
+        this.saving = false;
+        save.disabled = false;
+        new Notice('Q-Section: 保存失败：' + (err && err.message ? err.message : err));
+      }
+    };
+    save.addEventListener('click', submit);
+    root.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' || e.isComposing) return;
+      const target = e.target;
+      if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON' || target.type === 'checkbox')) return;
+      e.preventDefault();
+      void submit();
+    });
+    window.setTimeout(() => { titleInput.focus(); titleInput.select(); }, 50);
+  }
+
+  minutesLabel(minutes) {
+    const value = Math.max(0, Math.min(1439, Number(minutes) || 0));
+    return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}
+
+class QCountdownModal extends Modal {
+  constructor(app, plugin, options, callbacks) {
+    super(app);
+    this.plugin = plugin;
+    this.options = options || {};
+    this.callbacks = callbacks || {};
+    this.saving = false;
+  }
+
+  onOpen() {
+    decorateQModal(this);
+    const root = this.contentEl;
+    root.empty();
+    root.addClass('qsection-calendar-form-modal');
+    this.plugin.applyThemeClass(root);
+
+    const item = this.options.item || null;
+    root.createEl('h2', { text: item ? '编辑倒数日' : '新建倒数日' });
+
+    const form = root.createDiv({ cls: 'qsection-calendar-form' });
+    const titleField = form.createEl('label', { cls: 'qsection-calendar-field' });
+    titleField.createSpan({ text: '标题' });
+    const titleInput = titleField.createEl('input', { type: 'text', cls: 'qsection-actions-input' });
+    titleInput.value = item ? item.title : '';
+    titleInput.placeholder = '生日 / 考试 / 纪念日';
+
+    const dateField = form.createEl('label', { cls: 'qsection-calendar-field' });
+    dateField.createSpan({ text: '日期' });
+    const dateInput = dateField.createEl('input', { type: 'date', cls: 'qsection-actions-input' });
+    dateInput.value = item ? item.date : window.moment().format('YYYY-MM-DD');
+
+    const annualField = form.createEl('label', { cls: 'qsection-calendar-field qsection-calendar-field-inline' });
+    const annualInput = annualField.createEl('input', { type: 'checkbox' });
+    annualField.createSpan({ text: '每年重复（生日 / 纪念日）' });
+    annualInput.checked = item ? !!item.annual : false;
+
+    root.createEl('p', {
+      cls: 'qsection-calendar-form-hint',
+      text: '勾选「每年重复」后，卡片显示下一次日期；生日建议勾选。'
+    });
+
+    const actions = root.createDiv({ cls: 'qsection-actions-modal-row qsection-calendar-form-actions' });
+    if (item) {
+      const remove = actions.createEl('button', { cls: 'qsection-calendar-delete', text: '删除' });
+      remove.addEventListener('click', async () => {
+        if (this.saving || !this.callbacks.onDelete) return;
+        if (!window.confirm(`删除倒数日「${item.title}」？`)) return;
+        this.saving = true;
+        remove.disabled = true;
+        try {
+          await this.callbacks.onDelete();
+          this.close();
+        } catch (err) {
+          this.saving = false;
+          remove.disabled = false;
+          new Notice('Q-Section: 删除失败：' + (err && err.message ? err.message : err));
+        }
+      });
+    }
+    const cancel = actions.createEl('button', { text: '取消' });
+    cancel.addEventListener('click', () => this.close());
+    const save = actions.createEl('button', { text: '保存', cls: 'mod-cta' });
+
+    const submit = async () => {
+      if (this.saving || !this.callbacks.onSave) return;
+      const title = titleInput.value.replace(/\s+/g, ' ').trim();
+      if (!title) {
+        new Notice('Q-Section: 倒数日标题不能为空。');
+        titleInput.focus();
+        return;
+      }
+      const date = String(dateInput.value || '').trim();
+      if (!window.moment(date, 'YYYY-MM-DD', true).isValid()) {
+        new Notice('Q-Section: 请选择有效日期。');
+        dateInput.focus();
+        return;
+      }
+      this.saving = true;
+      save.disabled = true;
+      try {
+        await this.callbacks.onSave({
+          title,
+          date,
+          annual: annualInput.checked,
+          item
+        });
+        this.close();
+      } catch (err) {
+        this.saving = false;
+        save.disabled = false;
+        new Notice('Q-Section: 保存失败：' + (err && err.message ? err.message : err));
+      }
+    };
+    save.addEventListener('click', submit);
+    root.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' || e.isComposing) return;
+      const target = e.target;
+      if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON' || target.type === 'checkbox')) return;
+      e.preventDefault();
+      void submit();
+    });
+    window.setTimeout(() => { titleInput.focus(); titleInput.select(); }, 50);
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}
+
+class QCalendarView extends ItemView {
+  constructor(leaf, plugin) {
+    super(leaf);
+    this.plugin = plugin;
+    this.viewMode = 'week';
+    this.focusDate = window.moment().startOf('day');
+    this.rangeStart = this.focusDate.clone().startOf('isoWeek');
+    this.miniMonth = window.moment().startOf('month');
+    this.events = [];
+    this.loadToken = 0;
+    this.refreshTimer = null;
+    this.nowTimer = null;
+    this.initialScrollDone = false;
+  }
+
+  getViewType() { return 'qsection-calendar'; }
+  getDisplayText() { return 'Q 日历'; }
+  getIcon() { return 'calendar-range'; }
+
+  async onOpen() {
+    this.render();
+    this.nowTimer = window.setInterval(() => this.updateNowLine(), 60000);
+    this.registerEvent(this.app.vault.on('create', () => this.scheduleRender()));
+    this.registerEvent(this.app.vault.on('delete', () => this.scheduleRender()));
+    this.registerEvent(this.app.vault.on('rename', () => this.scheduleRender()));
+    this.registerEvent(this.app.vault.on('modify', () => this.scheduleRender()));
+    this.registerEvent(this.app.metadataCache.on('changed', () => this.scheduleRender()));
+    this.registerEvent(this.app.workspace.on('qsection:theme-changed', () => {
+      this.plugin.applyThemeClass(this.contentEl);
+    }));
+    this.registerEvent(this.app.workspace.on('qsection:countdown-changed', () => this.scheduleRender()));
+  }
+
+  async onClose() {
+    if (this.refreshTimer) window.clearTimeout(this.refreshTimer);
+    if (this.nowTimer) window.clearInterval(this.nowTimer);
+    this.refreshTimer = null;
+    this.nowTimer = null;
+    this.contentEl.empty();
+  }
+
+  scheduleRender() {
+    if (this.refreshTimer) window.clearTimeout(this.refreshTimer);
+    this.refreshTimer = window.setTimeout(() => { this.refreshTimer = null; void this.render(); }, 400);
+  }
+
+  viewDayCount() {
+    if (this.viewMode === 'week') return 7;
+    if (this.viewMode === '3day') return 3;
+    if (this.viewMode === 'day') return 1;
+    return 0;
+  }
+
+  rangeDates() {
+    if (this.viewMode === 'month') {
+      const start = this.rangeStart.clone().startOf('month').startOf('isoWeek');
+      const end = this.rangeStart.clone().endOf('month').endOf('isoWeek');
+      const days = [];
+      for (let cursor = start.clone(); cursor.isSameOrBefore(end, 'day'); cursor.add(1, 'day')) {
+        days.push(cursor.clone());
+      }
+      return days;
+    }
+    return Array.from({ length: this.viewDayCount() }, (_, i) => this.rangeStart.clone().add(i, 'day'));
+  }
+
+  rangeLabel() {
+    if (this.viewMode === 'month') return this.rangeStart.format('YYYY年M月');
+    const days = this.rangeDates();
+    const start = days[0];
+    const end = days[days.length - 1];
+    if (days.length === 1) return `${start.format('YYYY年M月D日')} ${start.format('ddd')}`;
+    if (start.isSame(end, 'month')) return `${start.format('YYYY年M月D日')} – ${end.format('D日')}`;
+    if (start.isSame(end, 'year')) return `${start.format('YYYY年M月D日')} – ${end.format('M月D日')}`;
+    return `${start.format('YYYY年M月D日')} – ${end.format('YYYY年M月D日')}`;
+  }
+
+  setViewMode(mode) {
+    if (!['month', 'week', '3day', 'day'].includes(mode)) return;
+    const wasMonth = this.viewMode === 'month';
+    const anchor = this.focusDate.clone();
+    this.viewMode = mode;
+    if (wasMonth && mode !== 'month') this.initialScrollDone = false;
+    if (mode === 'month') this.rangeStart = anchor.clone().startOf('month');
+    else if (mode === 'week') this.rangeStart = anchor.clone().startOf('isoWeek');
+    else this.rangeStart = anchor.clone().startOf('day');
+    this.miniMonth = this.rangeStart.clone().startOf('month');
+    void this.render();
+  }
+
+  stepRange(delta) {
+    if (this.viewMode === 'month') {
+      this.focusDate = this.focusDate.clone().add(delta, 'month').startOf('day');
+      this.rangeStart = this.focusDate.clone().startOf('month');
+    } else {
+      this.focusDate = this.focusDate.clone().add(delta * this.viewDayCount(), 'day').startOf('day');
+      this.rangeStart = this.viewMode === 'week'
+        ? this.focusDate.clone().startOf('isoWeek')
+        : this.focusDate.clone().startOf('day');
+    }
+    this.miniMonth = this.rangeStart.clone().startOf('month');
+    void this.render();
+  }
+
+  goToday() {
+    const now = window.moment();
+    this.focusDate = now.clone().startOf('day');
+    if (this.viewMode === 'month') this.rangeStart = this.focusDate.clone().startOf('month');
+    else if (this.viewMode === 'week') this.rangeStart = this.focusDate.clone().startOf('isoWeek');
+    else this.rangeStart = this.focusDate.clone().startOf('day');
+    this.miniMonth = this.rangeStart.clone().startOf('month');
+    void this.render();
+  }
+
+  async render() {
+    const token = ++this.loadToken;
+    const root = this.contentEl;
+    const previousScroll = root.querySelector('.qsection-calendar-scroll')?.scrollTop ?? null;
+    root.empty();
+    root.addClass('qsection-calendar-view');
+    this.plugin.applyThemeClass(root);
+
+    const header = root.createDiv({ cls: 'qsection-calendar-header' });
+    const nav = header.createDiv({ cls: 'qsection-calendar-nav' });
+    const prev = nav.createEl('button', { cls: 'qsection-calendar-nav-button', text: '‹', attr: { title: '上一段' } });
+    const today = nav.createEl('button', { cls: 'qsection-calendar-nav-button qsection-calendar-today-button', text: '今天' });
+    const next = nav.createEl('button', { cls: 'qsection-calendar-nav-button', text: '›', attr: { title: '下一段' } });
+    const title = header.createDiv({ cls: 'qsection-calendar-title' });
+    title.createSpan({ cls: 'qsection-calendar-kicker', text: 'Q 日历' });
+    title.createSpan({ cls: 'qsection-calendar-range', text: this.rangeLabel() });
+    const actions = header.createDiv({ cls: 'qsection-calendar-actions' });
+    const modes = actions.createDiv({ cls: 'qsection-calendar-modes' });
+    const modeButton = (mode, label) => modes.createEl('button', {
+      cls: 'qsection-calendar-mode' + (this.viewMode === mode ? ' is-active' : ''),
+      text: label
+    });
+    const month = modeButton('month', '月');
+    const week = modeButton('week', '周');
+    const three = modeButton('3day', '3 天');
+    const day = modeButton('day', '日');
+    const add = actions.createEl('button', { cls: 'qsection-calendar-add-button', text: '+ 日程', attr: { type: 'button', title: '新建日程' } });
+
+    prev.addEventListener('click', () => this.stepRange(-1));
+    next.addEventListener('click', () => this.stepRange(1));
+    today.addEventListener('click', () => this.goToday());
+    month.addEventListener('click', () => this.setViewMode('month'));
+    week.addEventListener('click', () => this.setViewMode('week'));
+    three.addEventListener('click', () => this.setViewMode('3day'));
+    day.addEventListener('click', () => this.setViewMode('day'));
+    add.addEventListener('click', () => {
+      const now = window.moment();
+      const focus = this.focusDate.clone().startOf('day');
+      const focusInMonth = focus.isSame(this.rangeStart, 'month');
+      const focusInRange = this.rangeDates().some((item) => item.isSame(focus, 'day'));
+      let date;
+      if (this.viewMode === 'month') {
+        date = focusInMonth ? focus.format('YYYY-MM-DD') : this.rangeStart.format('YYYY-MM-DD');
+      } else if (focusInRange) {
+        date = focus.format('YYYY-MM-DD');
+      } else if (this.rangeDates().some((item) => item.isSame(now, 'day'))) {
+        date = now.format('YYYY-MM-DD');
+      } else {
+        date = this.rangeStart.format('YYYY-MM-DD');
+      }
+      let startMinute = 9 * 60;
+      if (date === now.format('YYYY-MM-DD')) {
+        const rounded = Math.ceil((now.hours() * 60 + now.minutes()) / 30) * 30;
+        startMinute = Math.min(23 * 60 + 30, Math.max(9 * 60, rounded));
+      }
+      this.openScheduleModal({ date, startMinute, endMinute: Math.min(23 * 60 + 59, startMinute + 60), allDay: false });
+    });
+
+    const body = root.createDiv({ cls: 'qsection-calendar-body' });
+    const sidebar = body.createDiv({ cls: 'qsection-calendar-sidebar' });
+    const main = body.createDiv({ cls: 'qsection-calendar-main' });
+    main.createDiv({ cls: 'qsection-calendar-loading', text: '加载日历…' });
+
+    const events = await this.loadEvents();
+    if (token !== this.loadToken) return;
+    this.events = events;
+    this.renderSidebar(sidebar);
+    this.renderMain(main);
+    if (previousScroll !== null) {
+      const scroll = root.querySelector('.qsection-calendar-scroll');
+      if (scroll) scroll.scrollTop = previousScroll;
+    }
+  }
+
+  async loadEvents() {
+    const days = this.rangeDates();
+    const dayKeys = new Set(days.map((d) => d.format('YYYY-MM-DD')));
+    const events = [];
+    const push = (event) => {
+      if (!event.date || !dayKeys.has(event.date)) return;
+      events.push(event);
+    };
+
+    // Daily schedule blocks.
+    const focusLinePattern = /\s·\s(?:\d+\s*小时(?:\s*\d+\s*分钟)?|\d+\s*分钟)\s*\[startTime::\s*\d{1,2}:\d{2}\]\s*\[endTime::\s*\d{1,2}:\d{2}\]\s*$/;
+    for (const day of days) {
+      const date = day.format('YYYY-MM-DD');
+      const path = `07_Journal/Daily/${date.slice(0, 4)}/${date}.md`;
+      const file = this.app.vault.getAbstractFileByPath(path);
+      if (!(file instanceof TFile)) continue;
+      let text = '';
+      try { text = await this.app.vault.cachedRead(file); } catch (err) { continue; }
+      const lines = text.split(/\r?\n/);
+      const occurrences = new Map();
+      let inSchedule = false;
+      for (const line of lines) {
+        if (/^###\s+今日安排/.test(line)) { inSchedule = true; continue; }
+        if (inSchedule && /^###\s+/.test(line)) break;
+        if (!inSchedule || !/^-\s+/.test(line)) continue;
+        const startMatch = line.match(/\[startTime::\s*(\d{1,2}):(\d{2})\]/i);
+        const endMatch = line.match(/\[endTime::\s*(\d{1,2}):(\d{2})\]/i);
+        const locationMatch = line.match(/\[location::\s*([^\]]+)\]/i);
+        const title = line
+          .replace(/^-\s+/, '')
+          .replace(/\[[^\]]+::\s*[^\]]*\]/g, '')
+          .trim();
+        if (!title) continue;
+        const rawLine = line.replace(/\r$/, '');
+        const occurrence = occurrences.get(rawLine) || 0;
+        occurrences.set(rawLine, occurrence + 1);
+        const meta = {
+          date,
+          title,
+          path,
+          source: 'daily',
+          rawLine,
+          occurrence,
+          focusRecord: focusLinePattern.test(rawLine.trim()),
+          location: locationMatch ? locationMatch[1].trim() : ''
+        };
+        if (!startMatch) {
+          push({ ...meta, type: 'daily', allDay: true, startMinute: 0, endMinute: 0 });
+          continue;
+        }
+        const startMinute = Number(startMatch[1]) * 60 + Number(startMatch[2]);
+        let endMinute = endMatch ? Number(endMatch[1]) * 60 + Number(endMatch[2]) : startMinute + 30;
+        if (endMinute <= startMinute) endMinute = startMinute + 30;
+        push({ ...meta, type: 'focus', allDay: false, startMinute, endMinute });
+      }
+    }
+
+    // Check-ins as all-day chips.
+    const checkinRecords = new Set(this.plugin.getCheckinRecords());
+    const checkinItems = this.plugin.getCheckinItems(false);
+    for (const date of dayKeys) {
+      for (const item of checkinItems) {
+        if (!checkinRecords.has(`${item.id}|${date}`)) continue;
+        const path = `07_Journal/Daily/${date.slice(0, 4)}/${date}.md`;
+        push({ date, title: `打卡 · ${item.name}`, type: 'checkin', allDay: true, path, startMinute: 0, endMinute: 0 });
+      }
+    }
+
+    // Quick captures.
+    let captures = [];
+    try { captures = await this.plugin.getQuickCaptures(); } catch (err) { captures = []; }
+    for (const capture of captures) {
+      if (!dayKeys.has(capture.date)) continue;
+      const timeMatch = String(capture.time || '').match(/^(\d{1,2}):(\d{2})$/);
+      const title = String(capture.text || '').split('\n')[0].slice(0, 80);
+      if (!title) continue;
+      if (timeMatch) {
+        const startMinute = Number(timeMatch[1]) * 60 + Number(timeMatch[2]);
+        push({ date: capture.date, title: `速记 · ${title}`, type: 'capture', allDay: false, path: capture.path, startMinute, endMinute: startMinute + 20 });
+      } else {
+        push({ date: capture.date, title: `速记 · ${title}`, type: 'capture', allDay: true, path: capture.path, startMinute: 0, endMinute: 0 });
+      }
+    }
+
+    // Tasks, projects, content.
+    const files = this.app.vault.getMarkdownFiles();
+    for (const file of files) {
+      const fm = this.app.metadataCache.getFileCache(file)?.frontmatter;
+      if (!fm) continue;
+      const type = String(fm.type || '').toLowerCase();
+      if (type === 'task') {
+        const due = this.dateKey(fm['截止']);
+        const created = this.dateKey(fm['创建时间']);
+        const target = due || created;
+        if (!target || !dayKeys.has(target)) continue;
+        push({
+          date: target,
+          title: `任务 · ${file.basename}`,
+          type: 'task',
+          allDay: true,
+          path: file.path,
+          startMinute: 0,
+          endMinute: 0,
+          done: String(fm.status || '').toLowerCase() === 'done',
+          due: !!due,
+        });
+      } else if (type === 'project') {
+        const start = this.dateKey(fm['开始']);
+        const end = this.dateKey(fm['结束']);
+        if (start && dayKeys.has(start)) push({ date: start, title: `项目开始 · ${file.basename}`, type: 'project', allDay: true, path: file.path, startMinute: 0, endMinute: 0 });
+        if (end && dayKeys.has(end)) push({ date: end, title: `项目截止 · ${file.basename}`, type: 'project', allDay: true, path: file.path, startMinute: 0, endMinute: 0 });
+      } else if (type === 'content') {
+        const published = this.dateKey(fm['发布日期']);
+        if (published && dayKeys.has(published)) push({ date: published, title: `发布 · ${file.basename}`, type: 'content', allDay: true, path: file.path, startMinute: 0, endMinute: 0 });
+      }
+    }
+
+    // Countdowns and birthdays as all-day chips.
+    for (const item of this.plugin.getCountdowns()) {
+      for (const day of days) {
+        if (!this.plugin.countdownMatchesDate(item, day)) continue;
+        push({
+          date: day.format('YYYY-MM-DD'),
+          title: item.title,
+          type: item.kind === 'birthday' ? 'birthday' : 'countdown',
+          allDay: true,
+          path: '',
+          source: 'countdown',
+          countdownId: item.id,
+          startMinute: 0,
+          endMinute: 0
+        });
+      }
+    }
+
+    return events.sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
+      return a.startMinute - b.startMinute;
+    });
+  }
+
+  dateKey(value) {
+    const match = String(value || '').match(/\d{4}-\d{2}-\d{2}/);
+    return match ? match[0] : '';
+  }
+
+  eventsForDate(date) {
+    return this.events.filter((event) => event.date === date);
+  }
+
+  renderSidebar(parent) {
+    parent.empty();
+    this.renderMiniMonth(parent);
+    this.renderUpNext(parent);
+    this.renderCountdowns(parent);
+  }
+
+  renderMiniMonth(parent) {
+    const card = parent.createDiv({ cls: 'qsection-calendar-card qsection-calendar-mini' });
+    const head = card.createDiv({ cls: 'qsection-calendar-card-head' });
+    head.createSpan({ cls: 'qsection-calendar-card-title', text: this.miniMonth.format('YYYY年M月') });
+    const nav = head.createDiv({ cls: 'qsection-calendar-mini-nav' });
+    const prev = nav.createEl('button', { cls: 'qsection-calendar-nav-button', text: '‹' });
+    const next = nav.createEl('button', { cls: 'qsection-calendar-nav-button', text: '›' });
+    prev.addEventListener('click', () => { this.miniMonth = this.miniMonth.clone().subtract(1, 'month'); this.renderSidebar(this.contentEl.querySelector('.qsection-calendar-sidebar')); });
+    next.addEventListener('click', () => { this.miniMonth = this.miniMonth.clone().add(1, 'month'); this.renderSidebar(this.contentEl.querySelector('.qsection-calendar-sidebar')); });
+    const weekdays = card.createDiv({ cls: 'qsection-calendar-weekdays' });
+    ['一', '二', '三', '四', '五', '六', '日'].forEach((day) => weekdays.createSpan({ text: day }));
+    const grid = card.createDiv({ cls: 'qsection-calendar-mini-grid' });
+    const month = this.miniMonth.clone().startOf('month');
+    const start = month.clone().startOf('isoWeek');
+    const end = month.clone().endOf('month').endOf('isoWeek');
+    const eventDates = new Set(this.events.map((event) => event.date));
+    const rangeKeys = this.viewMode === 'month'
+      ? new Set()
+      : new Set(this.rangeDates().map((day) => day.format('YYYY-MM-DD')));
+    const cursor = start.clone();
+    while (cursor.isSameOrBefore(end, 'day')) {
+      const date = cursor.clone();
+      const key = date.format('YYYY-MM-DD');
+      const inMonth = date.month() === month.month();
+      const isToday = date.isSame(window.moment(), 'day');
+      const isFocus = date.isSame(this.focusDate, 'day');
+      const inRange = inMonth && rangeKeys.has(key);
+      const btn = grid.createEl('button', {
+        cls: 'qsection-calendar-mini-day' + (inMonth ? '' : ' is-out') + (isToday ? ' is-today' : '') + (isFocus ? ' is-focus' : '') + (eventDates.has(key) ? ' has-events' : '') + (inRange ? ' is-in-range' : ''),
+        text: inMonth ? String(date.date()) : '',
+        attr: { type: 'button', title: key },
+      });
+      if (inMonth) btn.addEventListener('click', () => {
+        this.focusDate = date.clone().startOf('day');
+        if (this.viewMode === 'month') this.rangeStart = date.clone().startOf('month');
+        else if (this.viewMode === 'week') this.rangeStart = date.clone().startOf('isoWeek');
+        else this.rangeStart = date.clone().startOf('day');
+        this.miniMonth = date.clone().startOf('month');
+        void this.render();
+      });
+      cursor.add(1, 'day');
+    }
+  }
+
+  renderUpNext(parent) {
+    const card = parent.createDiv({ cls: 'qsection-calendar-card qsection-calendar-upnext' });
+    const head = card.createDiv({ cls: 'qsection-calendar-card-head' });
+    head.createSpan({ cls: 'qsection-calendar-card-title', text: 'Up Next' });
+    const now = window.moment();
+    const upcoming = this.events
+      .filter((event) => event.date >= now.format('YYYY-MM-DD'))
+      .sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
+        return a.startMinute - b.startMinute;
+      })
+      .slice(0, 5);
+    if (!upcoming.length) {
+      card.createDiv({ cls: 'qsection-calendar-empty', text: '接下来没有排程。' });
+      return;
+    }
+    for (const event of upcoming) {
+      const row = card.createDiv({ cls: 'qsection-calendar-upnext-row' });
+      const time = row.createSpan({ cls: 'qsection-calendar-upnext-time' });
+      time.setText(event.allDay ? '全天' : `${this.minutesLabel(event.startMinute)} – ${this.minutesLabel(event.endMinute)}`);
+      const text = row.createSpan({ cls: 'qsection-calendar-upnext-title', text: event.title });
+      text.setAttribute('title', event.title);
+      row.addEventListener('click', () => { void this.openEvent(event); });
+    }
+  }
+
+  renderCountdowns(parent) {
+    const card = parent.createDiv({ cls: 'qsection-calendar-card qsection-calendar-countdowns' });
+    const head = card.createDiv({ cls: 'qsection-calendar-card-head' });
+    head.createSpan({ cls: 'qsection-calendar-card-title', text: '倒数日' });
+    const add = head.createEl('button', { cls: 'qsection-calendar-countdown-add', text: '+', attr: { type: 'button', title: '添加倒数日' } });
+    add.addEventListener('click', () => this.openCountdownModal());
+
+    const items = this.plugin.getCountdowns()
+      .map((item) => ({ item, info: this.plugin.countdownInfo(item) }))
+      .sort((a, b) => {
+        const aPast = a.info.days < 0 ? 1 : 0;
+        const bPast = b.info.days < 0 ? 1 : 0;
+        if (aPast !== bPast) return aPast - bPast;
+        return a.info.days - b.info.days;
+      });
+    if (!items.length) {
+      card.createDiv({ cls: 'qsection-calendar-empty', text: '还没有倒数日。' });
+      return;
+    }
+    for (const { item, info } of items) {
+      const row = card.createDiv({
+        cls: 'qsection-calendar-countdown-row'
+          + (info.today ? ' is-today' : '')
+          + (info.days < 0 ? ' is-past' : '')
+          + (item.kind === 'birthday' ? ' is-birthday' : '')
+      });
+      row.setAttribute('title', `${item.title} · ${info.dateLabel}`);
+      const main = row.createDiv({ cls: 'qsection-calendar-countdown-main' });
+      main.createSpan({ cls: 'qsection-calendar-countdown-title', text: item.title });
+      main.createSpan({ cls: 'qsection-calendar-countdown-date', text: info.dateLabel });
+      row.createSpan({ cls: 'qsection-calendar-countdown-days', text: info.label });
+      row.addEventListener('click', () => this.openCountdownModal(item));
+    }
+  }
+
+  renderMain(parent) {
+    parent.empty();
+    if (this.viewMode === 'month') {
+      this.renderMonthMain(parent);
+      return;
+    }
+    this.renderTimelineMain(parent);
+  }
+
+  renderMonthMain(parent) {
+    const days = this.rangeDates();
+    const board = parent.createDiv({ cls: 'qsection-calendar-month-board' });
+    const head = board.createDiv({ cls: 'qsection-calendar-month-head' });
+    head.createDiv({ cls: 'qsection-calendar-month-weeknum-head' });
+    ['一', '二', '三', '四', '五', '六', '日'].forEach((label) => {
+      head.createDiv({ cls: 'qsection-calendar-month-weekday', text: label });
+    });
+
+    const scroll = board.createDiv({ cls: 'qsection-calendar-month-scroll' });
+    const grid = scroll.createDiv({ cls: 'qsection-calendar-month-grid' });
+    const monthStart = this.rangeStart.clone().startOf('month');
+    for (let index = 0; index < days.length; index += 7) {
+      const week = days.slice(index, index + 7);
+      grid.createDiv({ cls: 'qsection-calendar-month-weeknum', text: 'W' + week[0].isoWeek() });
+      for (const day of week) {
+        const key = day.format('YYYY-MM-DD');
+        const inMonth = day.year() === monthStart.year() && day.month() === monthStart.month();
+        const cell = grid.createDiv({
+          cls: 'qsection-calendar-month-day'
+            + (inMonth ? '' : ' is-out')
+            + (day.isSame(window.moment(), 'day') ? ' is-today' : '')
+            + (day.isSame(this.focusDate, 'day') ? ' is-focus' : '')
+        });
+        cell.setAttribute('data-date', key);
+        cell.addEventListener('click', (evt) => {
+          if (evt.target.closest('.qsection-calendar-month-event')) return;
+          this.openDayView(day);
+        });
+
+        const dayHead = cell.createDiv({ cls: 'qsection-calendar-month-day-head' });
+        const dateButton = dayHead.createEl('button', {
+          cls: 'qsection-calendar-month-date',
+          text: String(day.date()),
+          attr: { type: 'button', title: key }
+        });
+        dateButton.addEventListener('click', (evt) => {
+          evt.stopPropagation();
+          this.openDayView(day);
+        });
+
+        const list = this.eventsForDate(key);
+        const eventsBox = cell.createDiv({ cls: 'qsection-calendar-month-events' });
+        for (const event of list.slice(0, 3)) {
+          const text = event.allDay ? event.title : `${this.minutesLabel(event.startMinute)} ${event.title}`;
+          const chip = eventsBox.createEl('button', {
+            cls: 'qsection-calendar-month-event',
+            text
+          });
+          chip.setAttribute('title', text);
+          chip.addEventListener('click', (evt) => {
+            evt.stopPropagation();
+            void this.openEvent(event);
+          });
+        }
+        if (list.length > 3) {
+          eventsBox.createSpan({ cls: 'qsection-calendar-month-more', text: `+${list.length - 3}` });
+        }
+      }
+    }
+  }
+
+  layoutTimedEvents(events) {
+    const sorted = events.slice().sort((a, b) => {
+      if (a.startMinute !== b.startMinute) return a.startMinute - b.startMinute;
+      return b.endMinute - a.endMinute;
+    });
+    const layout = new Map();
+    let cluster = [];
+    let clusterEnd = -1;
+    const flush = () => {
+      if (!cluster.length) return;
+      const laneEnds = [];
+      const assignments = new Map();
+      for (const event of cluster) {
+        let lane = laneEnds.findIndex((end) => end <= event.startMinute);
+        if (lane === -1) {
+          lane = laneEnds.length;
+          laneEnds.push(event.endMinute);
+        } else {
+          laneEnds[lane] = event.endMinute;
+        }
+        assignments.set(event, lane);
+      }
+      const lanes = Math.max(1, laneEnds.length);
+      for (const event of cluster) {
+        layout.set(event, { lane: assignments.get(event), lanes });
+      }
+      cluster = [];
+    };
+    for (const event of sorted) {
+      if (!cluster.length || event.startMinute < clusterEnd) {
+        cluster.push(event);
+        clusterEnd = Math.max(clusterEnd, event.endMinute);
+      } else {
+        flush();
+        cluster = [event];
+        clusterEnd = event.endMinute;
+      }
+    }
+    flush();
+    return layout;
+  }
+
+  renderTimelineMain(parent) {
+    const days = this.rangeDates();
+    const board = parent.createDiv({ cls: 'qsection-calendar-board' });
+    const template = `56px repeat(${days.length}, minmax(0, 1fr))`;
+    board.style.setProperty('--q-cal-days', String(days.length));
+    const head = board.createDiv({ cls: 'qsection-calendar-head' });
+    head.style.gridTemplateColumns = template;
+    head.createDiv({ cls: 'qsection-calendar-head-gutter' });
+    for (const day of days) {
+      const cell = head.createDiv({
+        cls: 'qsection-calendar-head-day'
+          + (day.isSame(window.moment(), 'day') ? ' is-today' : '')
+          + (day.isSame(this.focusDate, 'day') ? ' is-focus' : '')
+      });
+      cell.createSpan({ cls: 'qsection-calendar-head-weekday', text: day.format('ddd') });
+      cell.createSpan({ cls: 'qsection-calendar-head-date', text: day.format('M/D') });
+      cell.addEventListener('click', () => { void this.openDaily(day.format('YYYY-MM-DD')); });
+    }
+
+    const allDay = board.createDiv({ cls: 'qsection-calendar-allday' });
+    allDay.style.gridTemplateColumns = template;
+    allDay.createDiv({ cls: 'qsection-calendar-allday-label', text: '全天' });
+    const allDayEvents = new Map();
+    for (const day of days) {
+      const key = day.format('YYYY-MM-DD');
+      const list = this.eventsForDate(key).filter((event) => event.allDay);
+      allDayEvents.set(key, list);
+      const cell = allDay.createDiv({ cls: 'qsection-calendar-allday-cell' });
+      cell.addEventListener('click', (evt) => {
+        if (evt.target !== cell) return;
+        this.openScheduleModal({ date: key, allDay: true });
+      });
+      for (const event of list.slice(0, 4)) {
+        const chip = cell.createEl('button', { cls: this.eventClass(event), text: event.title });
+        chip.setAttribute('title', event.title);
+        chip.addEventListener('click', (evt) => { evt.stopPropagation(); void this.openEvent(event); });
+      }
+      if (list.length > 4) cell.createSpan({ cls: 'qsection-calendar-more', text: `+${list.length - 4}` });
+    }
+
+    const scroll = board.createDiv({ cls: 'qsection-calendar-scroll' });
+    const grid = scroll.createDiv({ cls: 'qsection-calendar-grid' });
+    grid.style.gridTemplateColumns = template;
+    const timeCol = grid.createDiv({ cls: 'qsection-calendar-time-col' });
+    for (let hour = 0; hour < 24; hour++) {
+      const label = timeCol.createDiv({ cls: 'qsection-calendar-time-label', text: `${String(hour).padStart(2, '0')}:00` });
+      label.style.top = `${hour * 48}px`;
+    }
+    for (const day of days) {
+      const key = day.format('YYYY-MM-DD');
+      const isToday = day.isSame(window.moment(), 'day');
+      const col = grid.createDiv({
+        cls: 'qsection-calendar-day-col'
+          + (isToday ? ' is-today' : '')
+          + (day.isSame(this.focusDate, 'day') ? ' is-focus' : '')
+      });
+      col.setAttribute('data-date', key);
+      col.addEventListener('click', (evt) => {
+        if (evt.target !== col) return;
+        const rect = col.getBoundingClientRect();
+        const y = Math.max(0, evt.clientY - rect.top);
+        let startMinute = Math.round((y / 48) * 60 / 30) * 30;
+        startMinute = Math.max(0, Math.min(23 * 60 + 30, startMinute));
+        const endMinute = Math.min(23 * 60 + 59, startMinute + 60);
+        this.openScheduleModal({ date: key, startMinute, endMinute, allDay: false });
+      });
+      const timed = this.eventsForDate(key).filter((event) => !event.allDay);
+      const layout = this.layoutTimedEvents(timed);
+      const colWidth = col.getBoundingClientRect().width;
+      for (const event of timed) {
+        const metrics = layout.get(event) || { lane: 0, lanes: 1 };
+        const block = col.createEl('button', { cls: this.eventClass(event) });
+        const top = (event.startMinute / 60) * 48;
+        const height = Math.max(24, ((event.endMinute - event.startMinute) / 60) * 48 - 2);
+        block.style.top = `${top}px`;
+        block.style.height = `${height}px`;
+        block.style.right = 'auto';
+        if (metrics.lanes > 1) {
+          const laneWidth = 100 / metrics.lanes;
+          block.style.left = `calc(${metrics.lane * laneWidth}% + 4px)`;
+          block.style.width = `calc(${laneWidth}% - 6px)`;
+          const fallbackWidth = this.viewMode === 'week' ? 70 : this.viewMode === '3day' ? 180 : 480;
+          const lanePx = (colWidth > 0 ? colWidth : fallbackWidth) / metrics.lanes;
+          block.classList.add(lanePx < 28 ? 'is-micro' : 'is-narrow');
+        } else {
+          block.style.left = '4px';
+          block.style.width = 'calc(100% - 8px)';
+        }
+        block.setText(metrics.lanes > 1 ? event.title : `${this.minutesLabel(event.startMinute)} ${event.title}`);
+        block.setAttribute('title', `${this.minutesLabel(event.startMinute)}–${this.minutesLabel(event.endMinute)} ${event.title}`);
+        block.addEventListener('click', (evt) => { evt.stopPropagation(); void this.openEvent(event); });
+      }
+      if (isToday) {
+        const line = col.createDiv({ cls: 'qsection-calendar-now-line' });
+        line.style.top = `${(window.moment().hours() * 60 + window.moment().minutes()) / 60 * 48}px`;
+      }
+    }
+    if (!this.initialScrollDone) {
+      this.initialScrollDone = true;
+      window.requestAnimationFrame(() => { scroll.scrollTop = 7 * 48; });
+    }
+  }
+
+  eventClass(event) {
+    return `qsection-calendar-event qsection-calendar-event--${event.type}` + (event.done ? ' is-done' : '');
+  }
+
+  minutesLabel(minutes) {
+    const value = Math.max(0, Math.min(1439, Number(minutes) || 0));
+    return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+  }
+
+  dailyNoteFile(date) {
+    const path = `07_Journal/Daily/${date.slice(0, 4)}/${date}.md`;
+    const file = this.app.vault.getAbstractFileByPath(path);
+    return file instanceof TFile ? file : null;
+  }
+
+  openScheduleModal(options = {}) {
+    new QCalendarEventModal(this.app, this.plugin, options, {
+      onSave: (payload) => this.saveSchedule(payload),
+      onDelete: () => this.deleteSchedule(options.event)
+    }).open();
+  }
+
+  async saveSchedule(payload) {
+    const original = payload.event || null;
+    const line = this.plugin.buildDailyScheduleLine(payload);
+    let noticeText = '日程已保存。';
+
+    if (!original) {
+      const file = await this.plugin.ensureDailyNoteFile(payload.date);
+      await this.app.vault.process(file, (text) => this.plugin.insertDailyScheduleLine(text, line));
+    } else if (original.date === payload.date) {
+      const file = this.dailyNoteFile(original.date);
+      if (!file) throw new Error('日笔记不存在。');
+      let updated = false;
+      await this.app.vault.process(file, (text) => {
+        const next = this.plugin.updateDailyScheduleLine(text, original.rawLine, line, original.occurrence || 0);
+        if (next === null) return text;
+        updated = true;
+        return next;
+      });
+      if (!updated) throw new Error('原日程已变化，请刷新后再试。');
+    } else {
+      const targetFile = await this.plugin.ensureDailyNoteFile(payload.date);
+      await this.app.vault.process(targetFile, (text) => this.plugin.insertDailyScheduleLine(text, line));
+      const oldFile = this.dailyNoteFile(original.date);
+      if (!oldFile) {
+        noticeText = '新日程已写入，但原日笔记不存在，旧日程未删除。';
+      } else {
+        let removed = false;
+        await this.app.vault.process(oldFile, (text) => {
+          const next = this.plugin.updateDailyScheduleLine(text, original.rawLine, null, original.occurrence || 0);
+          if (next === null) return text;
+          removed = true;
+          return next;
+        });
+        if (!removed) noticeText = '新日程已写入，但旧日程没找到，请检查是否重复。';
+      }
+    }
+
+    this.focusScheduleDate(payload.date);
+    new Notice('Q-Section: ' + noticeText);
+    this.scheduleRender();
+  }
+
+  async deleteSchedule(event) {
+    if (!event) return;
+    const file = this.dailyNoteFile(event.date);
+    if (!file) throw new Error('日笔记不存在。');
+    let removed = false;
+    await this.app.vault.process(file, (text) => {
+      const next = this.plugin.updateDailyScheduleLine(text, event.rawLine, null, event.occurrence || 0);
+      if (next === null) return text;
+      removed = true;
+      return next;
+    });
+    if (!removed) throw new Error('原日程已变化，请刷新后再试。');
+    new Notice('Q-Section: 日程已删除。');
+    this.scheduleRender();
+  }
+
+  openCountdownModal(item = null) {
+    new QCountdownModal(this.app, this.plugin, { item }, {
+      onSave: (payload) => this.saveCountdown(payload),
+      onDelete: () => this.deleteCountdown(item)
+    }).open();
+  }
+
+  async saveCountdown(payload) {
+    if (payload.item) await this.plugin.updateCountdown(payload.item.id, payload);
+    else await this.plugin.addCountdown(payload);
+    new Notice('Q-Section: 倒数日已保存。');
+    this.scheduleRender();
+  }
+
+  async deleteCountdown(item) {
+    if (!item) return;
+    await this.plugin.removeCountdown(item.id);
+    new Notice('Q-Section: 倒数日已删除。');
+    this.scheduleRender();
+  }
+
+  focusScheduleDate(date) {
+    const target = window.moment(date, 'YYYY-MM-DD', true);
+    if (!target.isValid()) return;
+    this.focusDate = target.clone().startOf('day');
+    if (this.viewMode === 'month') {
+      if (!target.isSame(this.rangeStart, 'month')) {
+        this.rangeStart = target.clone().startOf('month');
+        this.miniMonth = target.clone().startOf('month');
+      }
+      return;
+    }
+    const inRange = this.rangeDates().some((day) => day.isSame(target, 'day'));
+    if (inRange) {
+      this.miniMonth = target.clone().startOf('month');
+      return;
+    }
+    this.rangeStart = this.viewMode === 'week' ? target.clone().startOf('isoWeek') : target.clone().startOf('day');
+    this.miniMonth = target.clone().startOf('month');
+  }
+
+  async openEvent(event) {
+    if (event.source === 'daily') {
+      this.openScheduleModal({ event });
+      return;
+    }
+    if (event.source === 'countdown') {
+      const item = this.plugin.getCountdowns().find((entry) => entry.id === event.countdownId);
+      if (item) this.openCountdownModal(item);
+      return;
+    }
+    if (event.path) await this.app.workspace.openLinkText(event.path, '', true);
+  }
+
+  openDayView(day) {
+    this.viewMode = 'day';
+    this.initialScrollDone = false;
+    this.focusDate = day.clone().startOf('day');
+    this.rangeStart = this.focusDate.clone();
+    this.miniMonth = day.clone().startOf('month');
+    void this.render();
+  }
+
+  async openDaily(date) {
+    const path = `07_Journal/Daily/${date.slice(0, 4)}/${date}.md`;
+    if (this.app.vault.getAbstractFileByPath(path)) {
+      await this.app.workspace.openLinkText(path, '', true);
+    } else {
+      new Notice('Q-Section: 这一天还没有日笔记。');
+    }
+  }
+
+  updateNowLine() {
+    const line = this.contentEl.querySelector('.qsection-calendar-now-line');
+    if (!line) return;
+    const minutes = window.moment().hours() * 60 + window.moment().minutes();
+    line.style.top = `${(minutes / 60) * 48}px`;
+  }
+}
+
 class PreviewModal extends Modal {
   constructor(app, lines) {
     super(app);
@@ -2806,6 +3921,7 @@ class ParaRouterPlugin extends Plugin {
     this.registerView('qsection-actions', (leaf) => new ParaActionsView(leaf, this));
     this.registerView('qsection-report', (leaf) => new QSectionReportView(leaf, this));
     this.registerView('qsection-focus-window', (leaf) => new QSectionFocusWindowView(leaf, this));
+    this.registerView('qsection-calendar', (leaf) => new QCalendarView(leaf, this));
 
     this.registerEvent(this.app.vault.on('create', (file) => this.schedule(file)));
     this.registerEvent(this.app.metadataCache.on('changed', (file) => this.schedule(file)));
@@ -2815,6 +3931,7 @@ class ParaRouterPlugin extends Plugin {
 
     this.addRibbonIcon('diamond', 'Q 操作台', () => { void this.activateActionsView(); });
     this.addRibbonIcon('bar-chart-3', 'Q 截面', () => { void this.activateReportView(); });
+    this.addRibbonIcon('calendar-range', 'Q 日历', () => { void this.activateCalendarView(); });
 
     this.addCommand({
       id: 'open-actions-panel',
@@ -2825,6 +3942,11 @@ class ParaRouterPlugin extends Plugin {
       id: 'open-q-report',
       name: 'Open Q view',
       callback: () => { void this.openQReport(); }
+    });
+    this.addCommand({
+      id: 'open-q-calendar',
+      name: 'Open Q calendar',
+      callback: () => { void this.activateCalendarView(); }
     });
     this.addCommand({
       id: 'toggle-q-theme',
@@ -3053,6 +4175,25 @@ class ParaRouterPlugin extends Plugin {
       return;
     }
     await leaf.setViewState({ type: 'qsection-report', active: true });
+    this.app.workspace.revealLeaf(leaf);
+  }
+
+  async activateCalendarView() {
+    const existing = this.app.workspace.getLeavesOfType('qsection-calendar');
+    if (existing.length) {
+      const current = existing[0];
+      const root = current.getRoot?.();
+      if (!root || root === this.app.workspace.rootSplit) {
+        await current.loadIfDeferred?.();
+        this.app.workspace.revealLeaf(current);
+        return;
+      }
+      current.detach();
+    }
+    const right = this.app.workspace.rightSplit;
+    if (right && !right.collapsed) right.collapse();
+    const leaf = this.app.workspace.getLeaf('tab');
+    await leaf.setViewState({ type: 'qsection-calendar', active: true });
     this.app.workspace.revealLeaf(leaf);
   }
 
@@ -4326,7 +5467,7 @@ class ParaRouterPlugin extends Plugin {
         segments,
         completed: !!auto
       });
-      new Notice(`Q-Section: 专注 ${this.focusMinutesLabel(record.minutes)} 已记录，并写入 Full Calendar。`);
+      new Notice(`Q-Section: 专注 ${this.focusMinutesLabel(record.minutes)} 已记录，并写入今日安排。`);
       this.emitFocusChanged();
       window.setTimeout(() => {
         if (this.focusStatus === 'done') this.hideFocusMini();
@@ -4791,6 +5932,63 @@ class ParaRouterPlugin extends Plugin {
     return before + section + (tailText ? '\n' + tailText : '\n');
   }
 
+  buildDailyScheduleLine({ title, allDay, start, end, location }) {
+    const cleanText = (value) => String(value || '')
+      .replace(/[\r\n]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const cleanField = (value) => cleanText(value)
+      .replace(/\[/g, '［')
+      .replace(/\]/g, '］');
+    const cleanTitle = cleanText(title)
+      .replace(/\[[^\]]+::\s*[^\]]*\]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const parts = [`- ${cleanTitle}`];
+    if (!allDay) parts.push(`[startTime:: ${start}]`, `[endTime:: ${end}]`);
+    const place = cleanField(location);
+    if (place) parts.push(`[location:: ${place}]`);
+    return parts.join(' ');
+  }
+
+  insertDailyScheduleLine(text, line) {
+    return this.insertDailyFocusEvent(text, line);
+  }
+
+  updateDailyScheduleLine(text, oldLine, newLine, occurrence = 0) {
+    const heading = '### 今日安排';
+    const index = text.indexOf(heading);
+    if (index === -1) return null;
+    const after = index + heading.length;
+    const rest = text.slice(after);
+    const next = rest.search(/\n#{2,3}\s/);
+    const body = next === -1 ? rest : rest.slice(0, next);
+    const tail = next === -1 ? '' : rest.slice(next);
+    const normalized = String(body || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+    const parsed = this.splitScheduleBlocks(normalized);
+    const matches = [];
+    parsed.blocks.forEach((block, blockIndex) => {
+      const first = String(block[0] || '');
+      if (first === oldLine) matches.push(blockIndex);
+    });
+    if (!matches.length) return null;
+    const occurrenceIndex = Math.max(0, Number(occurrence) || 0);
+    const target = matches[occurrenceIndex];
+    if (target === undefined) return null;
+    if (newLine) {
+      const nextBlock = String(newLine).split('\n');
+      parsed.blocks[target] = nextBlock.concat(parsed.blocks[target].slice(1));
+    } else {
+      parsed.blocks.splice(target, 1);
+    }
+    const sorted = this.sortScheduleBlocks(parsed.blocks);
+    const rebuilt = parsed.prefix.concat(sorted.map((block) => block.join('\n'))).join('\n');
+    const before = text.slice(0, after).replace(/\s*$/, '');
+    const tailText = tail.replace(/^\s*/, '');
+    const section = rebuilt ? '\n\n' + rebuilt + '\n' : '\n';
+    return before + section + (tailText ? '\n' + tailText : '\n');
+  }
+
   insertDailyTodoLine(text, line) {
     const heading = '### 今日待办';
     const entry = String(line || '').trim();
@@ -4852,6 +6050,86 @@ class ParaRouterPlugin extends Plugin {
       });
     if (!lines.length) return;
     await this.app.vault.process(file, (text) => this.insertDailyFocusEvent(text, lines.join('\n')));
+  }
+
+  getCountdowns() {
+    const items = Array.isArray(this.settings.countdowns) ? this.settings.countdowns : [];
+    return items
+      .filter((item) => item && item.id && item.title && /^\d{4}-\d{2}-\d{2}$/.test(String(item.date || '')))
+      .map((item) => ({
+        ...item,
+        id: String(item.id),
+        title: String(item.title).trim(),
+        date: String(item.date).slice(0, 10),
+        annual: !!item.annual,
+        kind: item.kind === 'birthday' ? 'birthday' : 'countdown'
+      }));
+  }
+
+  countdownMatchesDate(item, day) {
+    const base = window.moment(item && item.date, 'YYYY-MM-DD', true);
+    if (!base.isValid()) return false;
+    if (item.annual) return day.month() === base.month() && day.date() === base.date();
+    return day.format('YYYY-MM-DD') === base.format('YYYY-MM-DD');
+  }
+
+  countdownInfo(item, from = window.moment()) {
+    const base = window.moment(item && item.date, 'YYYY-MM-DD', true);
+    const today = window.moment(from).startOf('day');
+    if (!base.isValid()) return { days: 0, label: '日期无效', dateLabel: '', today: false };
+    let target = base.clone().startOf('day');
+    if (item.annual) {
+      target = base.clone().year(today.year()).startOf('day');
+      if (target.isBefore(today, 'day')) target = base.clone().year(today.year() + 1).startOf('day');
+    }
+    const days = target.diff(today, 'days');
+    const dateLabel = item.annual ? `每年 ${base.format('M月D日')}` : base.format('YYYY-MM-DD');
+    let label;
+    if (days > 0) label = `还有 ${days} 天`;
+    else if (days === 0) label = '今天';
+    else label = `已过 ${Math.abs(days)} 天`;
+    return { days, label, dateLabel, today: days === 0, target };
+  }
+
+  async addCountdown(payload) {
+    const title = String(payload.title || '').replace(/\s+/g, ' ').trim();
+    const date = String(payload.date || '').slice(0, 10);
+    if (!title || !window.moment(date, 'YYYY-MM-DD', true).isValid()) {
+      throw new Error('标题或日期无效。');
+    }
+    const item = {
+      id: `cd-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      title,
+      date,
+      annual: !!payload.annual,
+      kind: payload.annual && /生日/.test(title) ? 'birthday' : 'countdown',
+      createdAt: new Date().toISOString()
+    };
+    this.settings.countdowns = this.getCountdowns().concat(item);
+    await this.saveSettings();
+    this.app.workspace.trigger('qsection:countdown-changed');
+    return item;
+  }
+
+  async updateCountdown(id, payload) {
+    const title = String(payload.title || '').replace(/\s+/g, ' ').trim();
+    const date = String(payload.date || '').slice(0, 10);
+    if (!title || !window.moment(date, 'YYYY-MM-DD', true).isValid()) {
+      throw new Error('标题或日期无效。');
+    }
+    this.settings.countdowns = this.getCountdowns().map((item) => (
+      item.id === id
+        ? { ...item, title, date, annual: !!payload.annual, kind: payload.annual && /生日/.test(title) ? 'birthday' : 'countdown' }
+        : item
+    ));
+    await this.saveSettings();
+    this.app.workspace.trigger('qsection:countdown-changed');
+  }
+
+  async removeCountdown(id) {
+    this.settings.countdowns = this.getCountdowns().filter((item) => item.id !== id);
+    await this.saveSettings();
+    this.app.workspace.trigger('qsection:countdown-changed');
   }
 
   getCheckinItems(includeArchived = false) {

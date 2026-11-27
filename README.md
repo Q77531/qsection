@@ -39,23 +39,29 @@ Install: copy the three files into `<your vault>/.obsidian/plugins/qsection/`, r
 
 ## Q-Section 插件 / The Q-Section plugin
 
-当前版本 **0.15.24**。Current version: **0.15.24**.
+当前版本 **0.17.2**。Current version: **0.17.2**.
 
-它是自建的 Obsidian 插件，包含四部分：
+它是自建的 Obsidian 插件，包含以下部分：
 
-It is a self-built Obsidian plugin with four parts:
+It is a self-built Obsidian plugin with the following parts:
 
 - **Q 截面（只读）**：右侧栏数据视图，六个一级模块——截面、推进、产出、输入、节奏、系统；只展示数据和只读导航，不写入、不操作。
-- **Q 操作台（唯一操作入口）**：当前页自适应动作、专注番茄钟（专注集、倒计时/正计时、暂停分段、浮动小窗 / 桌面小窗、Full Calendar；专注记录写入日笔记时按 `startTime` 排序）、项目打卡、速记与转化（含收藏、写作、草稿页签）、关系与推进、完成当前对象、新建对象、打开总览、路由、领域体检、路由健康。
+- **Q 日历**：日程与倒数日专用写入面；日程写入日笔记 `### 今日安排`，倒数日写入 `data.json` 的 `countdowns`，打卡、速记、任务、项目、内容仍只读。月 / 周 / 3 天 / 日视图，含 Mini Calendar、Up Next 和倒数日卡片；支持新建 / 编辑 / 删除日程、打开日程所在日期的日笔记，重叠日程并排显示。
+- **Q 操作台（唯一通用操作入口）**：当前页自适应动作、专注番茄钟（专注集、倒计时/正计时、暂停分段、浮动小窗 / 桌面小窗、Q 日历；专注记录写入日笔记时按 `startTime` 排序）、项目打卡、速记与转化（含收藏、写作、草稿页签）、关系与推进、完成当前对象、新建对象、打开总览、路由、领域体检、路由健康。
 - **自动路由**：按 frontmatter 的 `type` / `status` / `topic` / `note_kind` / `content_stage` / `period` 把笔记移动到对应目录。
 - **独立主题**：Q 主题可跟随 Obsidian、强制浅色或深色；ins 风软表面按钮。
-- **可选玻璃主题**：默认关闭；开启后 Q 操作台和 Q 截面使用半透明玻璃胶囊、滑动页签/行选中、玻璃菜单与弹窗；关闭时原主题不变。
+- **可选玻璃主题**：默认关闭；开启后 Q 操作台、Q 截面和 Q 日历使用半透明玻璃胶囊、滑动页签/行选中、玻璃菜单与弹窗；关闭时原主题不变。
+
+Q 日历由插件内置，不再依赖 Full Calendar 插件。
 
 - **Q Section (read-only)**: a sidebar data view with six top-level modules — Section, Push, Output, Input, Rhythm, and System; data and read-only navigation only.
-- **Q Console (the only place that writes)**: current-page actions, a focus timer with saved presets, countdown or stopwatch mode, pause segments, a floating mini window, a desktop popout window and Full Calendar, project check-ins, quick capture and conversion (with favorites, writing and drafts tabs), relations, completing the current object, new-object shortcuts, dashboard entry points, routing, area health and route health.
+- **Q calendar**: the writing surface for schedules and countdowns; schedules go into the daily note's `### 今日安排`, countdowns into `countdowns` in `data.json`, while check-ins, captures, tasks, projects and content stay read-only. Month / week / 3-day / day views with a mini calendar, Up Next and a countdowns card; create, edit and delete schedules, open the daily note of an event's date, and see overlapping events laid out side by side.
+- **Q Console (the main place for operations)**: current-page actions, a focus timer with saved presets, countdown or stopwatch mode, pause segments, a floating mini window, a desktop popout window and the Q calendar, project check-ins, quick capture and conversion (with favorites, writing and drafts tabs), relations, completing the current object, new-object shortcuts, dashboard entry points, routing, area health and route health.
 - **Auto-routing**: moves notes according to the `type` / `status` / `topic` / `note_kind` / `content_stage` / `period` frontmatter fields.
 - **Independent theme**: the Q theme follows Obsidian, or stays light/dark on its own; soft-surface, ins-style buttons.
-- **Optional glass theme**: off by default; when enabled, the Q Console and Q Section use translucent glass capsules, sliding tab/row selection, and glass menus/modals; the original theme stays unchanged when off.
+- **Optional glass theme**: off by default; when enabled, the Q Console, Q Section and Q calendar use translucent glass capsules, sliding tab/row selection, and glass menus/modals; the original theme stays unchanged when off.
+
+The Q calendar is built into the plugin and no longer depends on the Full Calendar plugin.
 
 ### 专注桌面小窗 / Focus desktop window
 
@@ -65,6 +71,11 @@ The focus desktop window is an Obsidian popout. On desktop it opens automaticall
 
 ### 更新记录 / Changelog
 
+- **0.17.2**：Q 日历时间轴支持重叠日程并排：按开始时间划分重叠组，组内按 lane 分栏，2 条各 50%、3 条各 33%，首尾相接不算重叠；窄栏隐藏时间前缀、缩小字号与内边距，列宽 < 28px 时只留色块，完整时间与标题保留在 tooltip；不重叠的日程、月视图和全天区不变。
+- **0.17.1**：月 / 周 / 3 天 / 日四个视图共用 `focusDate`：日视图切到 17 号后，再切月（12 月，焦点 17）、周（12/14–20）、3 天（12/17–19）、日（12/17）都围绕焦点日，不再被月视图重置到月初；翻页、今天、Mini Calendar、月视图点日期都会更新焦点日，Mini Calendar / 月视图 / 周表头高亮焦点日；日程编辑弹窗新增「打开日笔记」。
+- **0.17.0**：Q 日历新增月视图和日视图，模式顺序改为 `[月] [周] [3 天] [日]`（默认周）；月视图 7 列 + 周数、今天高亮、非本月淡化、每天最多 3 条 + `+N`，点日期进入日视图；Up Next 下面新增「倒数日」卡片，支持每年重复的生日和一次性倒数（数据存 `data.json` 的 `countdowns`），并作为全天事件显示在月 / 周 / 日视图；非玻璃模式补齐 Q 主题按钮，压过 Style Manager 的全局绿色按钮，深色不再浅底白字。
+- **0.16.1**：Q 日历支持直接新建 / 编辑 / 删除日程（时间轴空白格、全天格、`+ 日程`），写回日笔记 `### 今日安排` 并按 `startTime` 排序，改日期先写新日期再删旧行；修复 Mini Calendar 点任意日期跳到下一月、日期不对照；重绘保留滚动位置；日历与日程弹窗接入玻璃主题。
+- **0.16.0**：新增 Q 日历视图（默认 7 天，可切 3 天）：Mini Calendar + Up Next + 全天区 + 时间轴，聚合日笔记 `### 今日安排`、打卡、速记、任务、项目与内容发布日期；支持玻璃主题作用域；不依赖 Full Calendar 插件。
 - **0.15.24**：自动路由忽略 `copilot/`、`09_Sources/`、`00_Inbox/WorkBuddy/`，避免备份任务、私有资料和 WorkBuddy 原料被误当成正式对象移动；修复备份任务被路由进 `08_Tasks` 后在 Todo / Done 留下重复文件的问题。
 - **0.15.23**：Q 操作台 / Q 截面统一 4px 间距尺度（4/8/12/16/24）、卡片内边距和按钮规格；侧栏断点改为容器查询，窄栏时速记 / 打卡 / 专注 / 速记 console 自动单列，修复打卡表单被挤成 151px、placeholder 裁字；速记和草稿在重绘 / 切笔记时保留未发送内容并恢复光标；小字改用 muted 对比色，补 2px 键盘焦点环，转化 / 删除 / 日历控件点击目标 ≥24px。
 - **0.15.22**：新建领域自动创建 `02_Areas/<领域>/` 文件夹、主领域笔记，以及 `关联笔记 / 关联任务 / 关联项目` 三篇视图子笔记；主笔记 `routing: false`，不会被自动路由移出文件夹。不生成「关联剪藏」。
@@ -95,6 +106,11 @@ The focus desktop window is an Obsidian popout. On desktop it opens automaticall
 - **0.11.1**：修复 Q 操作台「新建」对象的路径生成错误；修复 resource 在没有 `note_kind` 时被放入 `<Topic>/Other`、而不是主题根目录的问题。
 - **0.11.0**：Q 截面六模块、Q 操作台、自动路由。
 
+- **0.17.2**: the Q calendar timeline lays overlapping events side by side: each overlap group splits into lanes (2 events at 50% each, 3 at 33% each; back-to-back events do not count as overlapping); narrow lanes hide the time prefix and shrink font and padding, and columns under 28px collapse to a colour block with the full time and title kept in the tooltip; non-overlapping events, the month view and the all-day row are unchanged.
+- **0.17.1**: month / week / 3-day / day share one `focusDate`: after switching the day view to the 17th, month (focused on the 17th), week (12/14–20), 3-day (12/17–19) and day (12/17) all stay around that date instead of the month view resetting to the start of the month; paging, Today, the mini calendar and month-cell clicks update the focused date, and the mini calendar, month cells and week header highlight it; the event modal gained "Open daily note".
+- **0.17.0**: the Q calendar gained month and day views, with the mode order `[Month] [Week] [3 days] [Day]` (week by default); the month grid has week numbers, today highlighting, dimmed out-of-month days and up to 3 events per day plus `+N`, and clicking a date opens the day view; a Countdowns card sits under Up Next, supporting yearly birthdays and one-off countdowns (stored in `countdowns` in `data.json`) and shown as all-day events in the month / week / day views; non-glass mode now gives calendar buttons the Q theme so the global green Style Manager buttons no longer win, and dark mode no longer shows white text on a light background.
+- **0.16.1**: the Q calendar can now create, edit and delete schedules directly (timeline cells, all-day cells, `+ Event`), writing back to the daily note's `### 今日安排` sorted by `startTime` and writing the new date before removing the old line; fixed the mini calendar jumping to the next month and showing wrong dates for any click; re-renders keep scroll position; the calendar and event modal joined the glass theme.
+- **0.16.0**: added the Q calendar view (7 days by default, switchable to 3): mini calendar, Up Next, an all-day row and a timeline, aggregating `### 今日安排`, check-ins, captures, task dates, project dates and content publish dates; scoped glass theme support; no Full Calendar dependency.
 - **0.15.24**: auto-routing now ignores `copilot/`, `09_Sources/` and `00_Inbox/WorkBuddy/`, so backup tasks, private sources and WorkBuddy material are no longer treated as real objects and moved; this fixes the duplicate tasks left in Todo/Done when backed-up tasks were routed into `08_Tasks`.
 - **0.15.23**: unified 4px spacing tokens (4/8/12/16/24), card padding and button sizing across the Q console and Q view; sidebar breakpoints now use container queries, stacking capture / check-in / focus / capture-console columns on narrow rails and fixing the 151px check-in field clipping; unsent capture and draft text now survive re-render and note switches, with cursor restored; small text uses the muted contrast color, adds a 2px keyboard focus ring, and brings convert / delete / calendar targets to at least 24px.
 - **0.15.22**: creating an area now builds `02_Areas/<area>/` with the main area note plus three view notes (related notes / tasks / projects); the main note has `routing: false` and stays in its folder. No "related clips" note is created.
