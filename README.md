@@ -59,7 +59,6 @@ It is a self-built Obsidian plugin with the following parts:
 - **Independent theme**: the Q theme follows Obsidian, or stays light/dark on its own; soft-surface, ins-style buttons.
 - **Optional glass theme**: off by default; when enabled, the Q Console, Q Section and Q calendar (including the focus capsule and focus panel) use translucent glass capsules, sliding tab/row selection, and glass menus/modals; the original theme stays unchanged when off.
 
-
 ### 专注桌面小窗 / Focus desktop window
 
 Q 操作台 → 专注 →「桌面小窗」会打开独立的 Obsidian popout 窗口；桌面版开始计时也会自动打开。窗口默认 240×240 内容尺寸，打开 / 重开时自动定位到当前屏幕右上角（8px 边距）并自动置顶，可拖到副屏；窗口内「置顶」按钮可取消 / 恢复置顶，如果当前 Obsidian 版本没有该按钮，可用 PowerToys Always On Top（默认 Win+Ctrl+T）钉住。原「小窗」仍留在 Obsidian 内。
