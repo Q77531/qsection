@@ -2796,6 +2796,32 @@ class QCalendarEventModal extends Modal {
 
     const actions = root.createDiv({ cls: 'qsection-actions-modal-row qsection-calendar-form-actions' });
     if (editing) {
+      const focusBusy = this.plugin.focusStatus === 'running' || this.plugin.focusStatus === 'paused';
+      const canStartFocus = event.source === 'daily'
+        && !event.allDay
+        && !event.focusRecord
+        && !event.planLinked
+        && !event.actualFocus
+        && event.date === window.moment().format('YYYY-MM-DD');
+      if (canStartFocus) {
+        const startFocus = actions.createEl('button', {
+          text: focusBusy ? '专注进行中' : '开始专注',
+          attr: { type: 'button', title: focusBusy ? '先结束当前专注' : '用这条日程的名称和时长开始专注' }
+        });
+        startFocus.disabled = focusBusy;
+        startFocus.addEventListener('click', () => {
+          if (startFocus.disabled) return;
+          const started = this.plugin.startFocusFromPlan({
+            date: event.date,
+            rawLine: event.rawLine,
+            occurrence: event.occurrence || 0,
+            title: event.title,
+            startMinute: event.startMinute,
+            endMinute: event.endMinute
+          });
+          if (started) this.close();
+        });
+      }
       const openDaily = actions.createEl('button', {
         cls: 'qsection-calendar-open-daily',
         text: '打开日笔记',
@@ -3013,6 +3039,7 @@ class QCalendarView extends ItemView {
     this.plugin = plugin;
     this.viewMode = 'week';
     this.focusDate = window.moment().startOf('day');
+    this.todayKey = this.focusDate.format('YYYY-MM-DD');
     this.rangeStart = this.focusDate.clone().startOf('isoWeek');
     this.miniMonth = window.moment().startOf('month');
     this.events = [];
@@ -3020,6 +3047,9 @@ class QCalendarView extends ItemView {
     this.refreshTimer = null;
     this.nowTimer = null;
     this.initialScrollDone = false;
+    this.focusRenderKey = '';
+    this.focusPanelOpen = false;
+    this.calendarFocusRefs = null;
   }
 
   getViewType() { return 'qsection-calendar'; }
@@ -3028,7 +3058,10 @@ class QCalendarView extends ItemView {
 
   async onOpen() {
     this.render();
-    this.nowTimer = window.setInterval(() => this.updateNowLine(), 60000);
+    this.nowTimer = window.setInterval(() => {
+      this.checkDayRollover();
+      this.updateNowLine();
+    }, 60000);
     this.registerEvent(this.app.vault.on('create', () => this.scheduleRender()));
     this.registerEvent(this.app.vault.on('delete', () => this.scheduleRender()));
     this.registerEvent(this.app.vault.on('rename', () => this.scheduleRender()));
@@ -3038,6 +3071,18 @@ class QCalendarView extends ItemView {
       this.plugin.applyThemeClass(this.contentEl);
     }));
     this.registerEvent(this.app.workspace.on('qsection:countdown-changed', () => this.scheduleRender()));
+    this.registerEvent(this.app.workspace.on('qsection:focus-changed', () => {
+      this.updateFocusWidgets();
+      const ref = this.plugin.focusPlanRef;
+      const key = `${this.plugin.focusStatus}|${ref ? `${ref.date}|${ref.occurrence || 0}|${ref.rawLine}` : ''}`;
+      if (key === this.focusRenderKey) return;
+      this.focusRenderKey = key;
+      this.scheduleRender();
+    }));
+    this.registerDomEvent(document, 'visibilitychange', () => {
+      if (document.visibilityState === 'visible') this.checkDayRollover();
+    });
+    this.registerDomEvent(window, 'focus', () => this.checkDayRollover());
   }
 
   async onClose() {
@@ -3051,6 +3096,28 @@ class QCalendarView extends ItemView {
   scheduleRender() {
     if (this.refreshTimer) window.clearTimeout(this.refreshTimer);
     this.refreshTimer = window.setTimeout(() => { this.refreshTimer = null; void this.render(); }, 400);
+  }
+
+  toggleFocusPanel() {
+    this.focusPanelOpen = !this.focusPanelOpen;
+    void this.render();
+  }
+
+  checkDayRollover() {
+    const today = window.moment().startOf('day');
+    const key = today.format('YYYY-MM-DD');
+    if (key === this.todayKey) return false;
+    const previousKey = this.todayKey;
+    this.todayKey = key;
+    if (this.focusDate.format('YYYY-MM-DD') === previousKey) {
+      this.focusDate = today.clone();
+      if (this.viewMode === 'month') this.rangeStart = this.focusDate.clone().startOf('month');
+      else if (this.viewMode === 'week') this.rangeStart = this.focusDate.clone().startOf('isoWeek');
+      else this.rangeStart = this.focusDate.clone().startOf('day');
+      this.miniMonth = this.rangeStart.clone().startOf('month');
+    }
+    void this.render();
+    return true;
   }
 
   viewDayCount() {
@@ -3138,6 +3205,25 @@ class QCalendarView extends ItemView {
     title.createSpan({ cls: 'qsection-calendar-kicker', text: 'Q 日历' });
     title.createSpan({ cls: 'qsection-calendar-range', text: this.rangeLabel() });
     const actions = header.createDiv({ cls: 'qsection-calendar-actions' });
+    const focusDock = actions.createDiv({ cls: 'qsection-calendar-focus-dock' });
+    const capsule = focusDock.createDiv({ cls: 'qsection-calendar-focus-capsule' });
+    const focusToggle = capsule.createEl('button', {
+      cls: 'qsection-calendar-focus-toggle',
+      text: '▶',
+      attr: { type: 'button', title: '开始 / 暂停专注' }
+    });
+    const focusLabel = capsule.createEl('button', {
+      cls: 'qsection-calendar-focus-label',
+      text: '专注 25:00',
+      attr: { type: 'button', title: '打开专注面板' }
+    });
+    this.calendarFocusRefs = { capsule, toggle: focusToggle, label: focusLabel };
+    focusLabel.addEventListener('click', () => this.toggleFocusPanel());
+    focusToggle.addEventListener('click', () => {
+      if (this.plugin.focusStatus === 'running') this.plugin.pauseFocusTimer();
+      else this.plugin.startFocusTimer();
+      this.updateFocusWidgets();
+    });
     const modes = actions.createDiv({ cls: 'qsection-calendar-modes' });
     const modeButton = (mode, label) => modes.createEl('button', {
       cls: 'qsection-calendar-mode' + (this.viewMode === mode ? ' is-active' : ''),
@@ -3193,6 +3279,8 @@ class QCalendarView extends ItemView {
       const scroll = root.querySelector('.qsection-calendar-scroll');
       if (scroll) scroll.scrollTop = previousScroll;
     }
+    if (this.focusPanelOpen) this.renderFocusPanel(root);
+    this.updateFocusWidgets();
   }
 
   async loadEvents() {
@@ -3223,6 +3311,7 @@ class QCalendarView extends ItemView {
         const startMatch = line.match(/\[startTime::\s*(\d{1,2}):(\d{2})\]/i);
         const endMatch = line.match(/\[endTime::\s*(\d{1,2}):(\d{2})\]/i);
         const locationMatch = line.match(/\[location::\s*([^\]]+)\]/i);
+        const focusPlanMatch = line.match(/\[focusPlan::\s*(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})\]/i);
         const title = line
           .replace(/^-\s+/, '')
           .replace(/\[[^\]]+::\s*[^\]]*\]/g, '')
@@ -3239,6 +3328,10 @@ class QCalendarView extends ItemView {
           rawLine,
           occurrence,
           focusRecord: focusLinePattern.test(rawLine.trim()),
+          focusPlan: !!focusPlanMatch,
+          planStartMinute: focusPlanMatch ? Number(focusPlanMatch[1]) * 60 + Number(focusPlanMatch[2]) : null,
+          planEndMinute: focusPlanMatch ? Number(focusPlanMatch[3]) * 60 + Number(focusPlanMatch[4]) : null,
+          planTitle: title.replace(/\s·\s(?:\d+\s*小时(?:\s*\d+\s*分钟)?|\d+\s*分钟)\s*$/, '').trim(),
           location: locationMatch ? locationMatch[1].trim() : ''
         };
         if (!startMatch) {
@@ -3312,6 +3405,24 @@ class QCalendarView extends ItemView {
       }
     }
 
+    // Link actual focus lines to their planned schedule line.
+    const planMap = new Map();
+    for (const event of events) {
+      if (event.source !== 'daily' || event.allDay || event.focusRecord) continue;
+      const key = `${event.date}|${event.title}|${event.startMinute}-${event.endMinute}`;
+      if (!planMap.has(key)) planMap.set(key, event);
+    }
+    for (const event of events) {
+      if (event.source !== 'daily' || !event.focusPlan) continue;
+      if (event.planStartMinute === null || event.planEndMinute === null) continue;
+      const key = `${event.date}|${event.planTitle}|${event.planStartMinute}-${event.planEndMinute}`;
+      const plan = planMap.get(key);
+      if (!plan) continue;
+      event.plan = plan;
+      event.planLinked = true;
+      plan.actualFocus = true;
+    }
+
     // Countdowns and birthdays as all-day chips.
     for (const item of this.plugin.getCountdowns()) {
       for (const day of days) {
@@ -3349,8 +3460,259 @@ class QCalendarView extends ItemView {
   renderSidebar(parent) {
     parent.empty();
     this.renderMiniMonth(parent);
+    this.renderFocusPresets(parent);
     this.renderUpNext(parent);
     this.renderCountdowns(parent);
+  }
+
+  renderFocusPresets(parent) {
+    const card = parent.createDiv({ cls: 'qsection-calendar-card qsection-calendar-focus-presets-card' });
+    const head = card.createDiv({ cls: 'qsection-calendar-card-head' });
+    head.createSpan({ cls: 'qsection-calendar-card-title', text: '专注集' });
+    const manage = head.createEl('button', {
+      cls: 'qsection-calendar-focus-manage',
+      text: '管理',
+      attr: { type: 'button', title: '打开 Q 操作台专注面板' }
+    });
+    manage.addEventListener('click', () => { void this.plugin.activateActionsView(); });
+
+    const presets = this.plugin.getFocusPresets();
+    const busy = this.plugin.focusStatus === 'running' || this.plugin.focusStatus === 'paused';
+    if (!presets.length) {
+      card.createDiv({ cls: 'qsection-calendar-empty', text: '还没有专注集；在 Q 操作台保存。' });
+      return;
+    }
+    const list = card.createDiv({ cls: 'qsection-calendar-focus-preset-list' });
+    for (const preset of presets) {
+      const active = this.plugin.focusPresetId === preset.id;
+      const row = list.createEl('button', {
+        cls: 'qsection-calendar-focus-preset' + (active ? ' is-active' : ''),
+        text: preset.mode === 'stopwatch' ? `${preset.name} · 正计时` : `${preset.name} · ${preset.minutes} 分`,
+        attr: { type: 'button' }
+      });
+      row.disabled = busy;
+      row.addEventListener('click', () => {
+        if (busy) return;
+        this.plugin.applyFocusPreset(preset.id);
+        this.plugin.startFocusTimer();
+        this.updateFocusWidgets();
+        this.scheduleRender();
+      });
+    }
+  }
+
+  shiftMiniMonth(delta) {
+    this.miniMonth = this.miniMonth.clone().add(delta, 'month').startOf('month');
+    if (this.viewMode === 'month') {
+      const day = Math.min(this.focusDate.date(), this.miniMonth.daysInMonth());
+      this.focusDate = this.miniMonth.clone().date(day).startOf('day');
+      this.rangeStart = this.miniMonth.clone().startOf('month');
+      void this.render();
+      return;
+    }
+    const sidebar = this.contentEl.querySelector('.qsection-calendar-sidebar');
+    if (sidebar) this.renderSidebar(sidebar);
+  }
+
+  renderFocusPanel(root) {
+    const plugin = this.plugin;
+    const panel = root.createDiv({ cls: 'qsection-calendar-focus-panel' });
+    const head = panel.createDiv({ cls: 'qsection-calendar-focus-panel-head' });
+    head.createSpan({ cls: 'qsection-calendar-focus-panel-title', text: '专注' });
+    const close = head.createEl('button', {
+      cls: 'qsection-calendar-focus-close',
+      text: '×',
+      attr: { type: 'button', title: '关闭专注面板' }
+    });
+    close.addEventListener('click', () => {
+      this.focusPanelOpen = false;
+      void this.render();
+    });
+
+    const planHint = panel.createDiv({ cls: 'qsection-calendar-focus-plan' });
+    const nameInput = panel.createEl('input', { cls: 'qsection-focus-name', attr: { type: 'text', placeholder: '专注名称' } });
+    nameInput.value = plugin.focusName || '专注';
+    const commitName = () => plugin.setFocusName(nameInput.value);
+    nameInput.addEventListener('change', commitName);
+    nameInput.addEventListener('blur', commitName);
+    nameInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        nameInput.blur();
+      }
+    });
+
+    const modeRow = panel.createDiv({ cls: 'qsection-focus-modes' });
+    const modeCountdown = modeRow.createEl('button', { cls: 'qsection-focus-mode', text: '倒计时', attr: { type: 'button' } });
+    const modeStopwatch = modeRow.createEl('button', { cls: 'qsection-focus-mode', text: '正计时', attr: { type: 'button' } });
+    modeCountdown.addEventListener('click', () => {
+      plugin.setFocusMode('countdown');
+      this.updateFocusWidgets();
+      void this.render();
+    });
+    modeStopwatch.addEventListener('click', () => {
+      plugin.setFocusMode('stopwatch');
+      this.updateFocusWidgets();
+      void this.render();
+    });
+
+    const timeEl = panel.createDiv({ cls: 'qsection-focus-time', text: '25:00' });
+    const statusEl = panel.createDiv({ cls: 'qsection-focus-status', text: '未开始' });
+    const progress = panel.createDiv({ cls: 'qsection-focus-progress' });
+    const progressFill = progress.createDiv({ cls: 'qsection-focus-progress-fill' });
+
+    const settings = panel.createDiv({ cls: 'qsection-focus-settings' });
+    const durationPresets = [];
+    let durationInput = null;
+    let durationButton = null;
+    if (plugin.focusMode === 'countdown') {
+      const current = Math.round(plugin.focusDuration / 60);
+      [15, 25, 45, 60, 90].forEach((minutes) => {
+        const btn = settings.createEl('button', {
+          cls: 'qsection-focus-preset qsection-duration-preset' + (current === minutes ? ' is-active' : ''),
+          text: `${minutes} 分`,
+          attr: { type: 'button' }
+        });
+        btn.dataset.minutes = String(minutes);
+        durationPresets.push(btn);
+        btn.addEventListener('click', () => {
+          plugin.setFocusDuration(minutes);
+          this.updateFocusWidgets();
+        });
+      });
+      durationInput = settings.createEl('input', { cls: 'qsection-focus-input', attr: { type: 'number', min: '1', max: '360' } });
+      durationInput.value = String(current);
+      durationButton = settings.createEl('button', { cls: 'qsection-focus-preset', text: '设定', attr: { type: 'button' } });
+      durationButton.addEventListener('click', () => {
+        const value = Number(durationInput.value);
+        if (!Number.isFinite(value) || value < 1 || value > 360) {
+          new Notice('Q-Section: 倒计时范围是 1–360 分钟。');
+          return;
+        }
+        plugin.setFocusDuration(Math.round(value));
+        this.updateFocusWidgets();
+      });
+    } else {
+      settings.createSpan({ cls: 'qsection-calendar-focus-muted', text: '正计时上限 12 小时。' });
+    }
+
+    const buttons = panel.createDiv({ cls: 'qsection-focus-buttons' });
+    const start = buttons.createEl('button', { cls: 'qsection-focus-primary', text: '开始', attr: { type: 'button' } });
+    const pause = buttons.createEl('button', { cls: 'qsection-focus-preset', text: '暂停', attr: { type: 'button' } });
+    const finish = buttons.createEl('button', { cls: 'qsection-focus-preset', text: '结束并记录', attr: { type: 'button' } });
+    const reset = buttons.createEl('button', { cls: 'qsection-focus-preset', text: '重置', attr: { type: 'button' } });
+    start.addEventListener('click', () => {
+      plugin.startFocusTimer();
+      this.updateFocusWidgets();
+    });
+    pause.addEventListener('click', () => {
+      plugin.pauseFocusTimer();
+      this.updateFocusWidgets();
+    });
+    finish.addEventListener('click', () => { void plugin.finishFocusTimer(false); });
+    reset.addEventListener('click', () => {
+      plugin.resetFocusTimer();
+      this.updateFocusWidgets();
+    });
+
+    const secondary = panel.createDiv({ cls: 'qsection-calendar-focus-secondary' });
+    const savePreset = secondary.createEl('button', { cls: 'qsection-focus-preset', text: '保存到专注集', attr: { type: 'button' } });
+    savePreset.addEventListener('click', () => {
+      const minutes = plugin.focusMode === 'countdown' ? Math.round(plugin.focusDuration / 60) : 0;
+      void plugin.addFocusPreset(plugin.focusName, minutes, plugin.focusMode).then((preset) => {
+        if (preset) {
+          new Notice(`Q-Section: 已保存专注项目：${preset.name}`);
+          this.scheduleRender();
+        }
+      });
+    });
+    const mini = secondary.createEl('button', { cls: 'qsection-focus-preset', text: '小窗', attr: { type: 'button' } });
+    mini.addEventListener('click', () => plugin.showFocusMini());
+    const popout = secondary.createEl('button', { cls: 'qsection-focus-preset', text: '桌面小窗', attr: { type: 'button' } });
+    popout.addEventListener('click', () => { void plugin.showFocusPopout(); });
+
+    panel.createDiv({ cls: 'qsection-calendar-focus-hint', text: '完整统计在 Q 截面 → 节奏 → 专注；专注结束会写入今日安排。' });
+
+    this.calendarFocusRefs = {
+      ...(this.calendarFocusRefs || {}),
+      panel,
+      time: timeEl,
+      status: statusEl,
+      progress: progressFill,
+      name: nameInput,
+      start,
+      pause,
+      finish,
+      reset,
+      modeCountdown,
+      modeStopwatch,
+      durationPresets,
+      durationInput,
+      durationButton,
+      planHint
+    };
+    this.updateFocusWidgets();
+  }
+
+  updateFocusWidgets() {
+    const refs = this.calendarFocusRefs;
+    if (!refs || !this.plugin.getFocusSnapshot) return;
+    const snap = this.plugin.getFocusSnapshot();
+    const status = snap.status;
+    const clock = this.plugin.formatFocusClock(snap.displaySeconds);
+    const statusText = { idle: '未开始', running: '进行中', paused: '已暂停', done: '已完成' }[status] || '未开始';
+    let label = `专注 ${clock}`;
+    if (status === 'running') label = `${clock} ${snap.name}`;
+    else if (status === 'paused') label = `已暂停 ${clock}`;
+    else if (status === 'done') label = `完成 ${clock}`;
+    if (refs.label) {
+      refs.label.setText(label);
+      refs.label.setAttribute('title', label);
+    }
+    if (refs.toggle) {
+      refs.toggle.setText(status === 'running' ? '⏸' : '▶');
+      refs.toggle.setAttribute('title', status === 'running' ? '暂停专注' : status === 'paused' ? '继续专注' : '开始专注');
+    }
+    if (refs.capsule) {
+      refs.capsule.classList.toggle('is-running', status === 'running');
+      refs.capsule.classList.toggle('is-paused', status === 'paused');
+      refs.capsule.classList.toggle('is-done', status === 'done');
+      refs.capsule.classList.toggle('is-open', !!this.focusPanelOpen);
+    }
+    if (!refs.panel) return;
+    if (refs.name && document.activeElement !== refs.name) refs.name.value = snap.name || '专注';
+    if (refs.time) refs.time.setText(clock);
+    if (refs.status) refs.status.setText(statusText + (status === 'running' ? ' · ' + (snap.mode === 'stopwatch' ? '正计时' : '倒计时') : ''));
+    if (refs.progress) refs.progress.style.width = `${Math.round(snap.progress * 100)}%`;
+    if (refs.start) {
+      refs.start.setText(status === 'paused' ? '继续' : status === 'done' ? '再来一轮' : status === 'running' ? '进行中' : '开始');
+      refs.start.disabled = status === 'running';
+    }
+    if (refs.pause) refs.pause.disabled = status !== 'running';
+    if (refs.finish) refs.finish.disabled = !(status === 'running' || status === 'paused');
+    if (refs.reset) refs.reset.disabled = status === 'idle';
+    if (refs.modeCountdown) refs.modeCountdown.classList.toggle('is-active', snap.mode === 'countdown');
+    if (refs.modeStopwatch) refs.modeStopwatch.classList.toggle('is-active', snap.mode === 'stopwatch');
+    const locked = status === 'running' || status === 'paused';
+    if (refs.durationPresets) {
+      const currentMinutes = Math.round(this.plugin.focusDuration / 60);
+      refs.durationPresets.forEach((btn) => btn.classList.toggle('is-active', Number(btn.dataset.minutes) === currentMinutes));
+    }
+    if (refs.durationInput) {
+      refs.durationInput.disabled = locked;
+      if (document.activeElement !== refs.durationInput) refs.durationInput.value = String(Math.round(this.plugin.focusDuration / 60));
+    }
+    if (refs.durationButton) refs.durationButton.disabled = locked;
+    if (refs.planHint) {
+      const plan = this.plugin.focusPlanRef;
+      if (plan) {
+        refs.planHint.setText(`来自日程 · ${plan.title} ${plan.planStart}–${plan.planEnd}`);
+        refs.planHint.classList.remove('is-hidden');
+      } else {
+        refs.planHint.setText('');
+        refs.planHint.classList.add('is-hidden');
+      }
+    }
   }
 
   renderMiniMonth(parent) {
@@ -3360,8 +3722,8 @@ class QCalendarView extends ItemView {
     const nav = head.createDiv({ cls: 'qsection-calendar-mini-nav' });
     const prev = nav.createEl('button', { cls: 'qsection-calendar-nav-button', text: '‹' });
     const next = nav.createEl('button', { cls: 'qsection-calendar-nav-button', text: '›' });
-    prev.addEventListener('click', () => { this.miniMonth = this.miniMonth.clone().subtract(1, 'month'); this.renderSidebar(this.contentEl.querySelector('.qsection-calendar-sidebar')); });
-    next.addEventListener('click', () => { this.miniMonth = this.miniMonth.clone().add(1, 'month'); this.renderSidebar(this.contentEl.querySelector('.qsection-calendar-sidebar')); });
+    prev.addEventListener('click', () => this.shiftMiniMonth(-1));
+    next.addEventListener('click', () => this.shiftMiniMonth(1));
     const weekdays = card.createDiv({ cls: 'qsection-calendar-weekdays' });
     ['一', '二', '三', '四', '五', '六', '日'].forEach((day) => weekdays.createSpan({ text: day }));
     const grid = card.createDiv({ cls: 'qsection-calendar-mini-grid' });
@@ -3403,7 +3765,7 @@ class QCalendarView extends ItemView {
     head.createSpan({ cls: 'qsection-calendar-card-title', text: 'Up Next' });
     const now = window.moment();
     const upcoming = this.events
-      .filter((event) => event.date >= now.format('YYYY-MM-DD'))
+      .filter((event) => !event.planLinked && event.date >= now.format('YYYY-MM-DD'))
       .sort((a, b) => {
         if (a.date !== b.date) return a.date.localeCompare(b.date);
         if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
@@ -3509,7 +3871,7 @@ class QCalendarView extends ItemView {
           this.openDayView(day);
         });
 
-        const list = this.eventsForDate(key);
+        const list = this.eventsForDate(key).filter((event) => !event.planLinked);
         const eventsBox = cell.createDiv({ cls: 'qsection-calendar-month-events' });
         for (const event of list.slice(0, 3)) {
           const text = event.allDay ? event.title : `${this.minutesLabel(event.startMinute)} ${event.title}`;
@@ -3639,11 +4001,12 @@ class QCalendarView extends ItemView {
         this.openScheduleModal({ date: key, startMinute, endMinute, allDay: false });
       });
       const timed = this.eventsForDate(key).filter((event) => !event.allDay);
-      const layout = this.layoutTimedEvents(timed);
+      const planTimed = timed.filter((event) => !event.planLinked);
+      const actualTimed = timed.filter((event) => event.planLinked && event.plan);
+      const layout = this.layoutTimedEvents(planTimed);
       const colWidth = col.getBoundingClientRect().width;
-      for (const event of timed) {
-        const metrics = layout.get(event) || { lane: 0, lanes: 1 };
-        const block = col.createEl('button', { cls: this.eventClass(event) });
+      const planMetrics = new Map();
+      const applyGeometry = (block, event, metrics) => {
         const top = (event.startMinute / 60) * 48;
         const height = Math.max(24, ((event.endMinute - event.startMinute) / 60) * 48 - 2);
         block.style.top = `${top}px`;
@@ -3660,8 +4023,34 @@ class QCalendarView extends ItemView {
           block.style.left = '4px';
           block.style.width = 'calc(100% - 8px)';
         }
+      };
+
+      for (const event of planTimed) {
+        const metrics = layout.get(event) || { lane: 0, lanes: 1 };
+        planMetrics.set(event, metrics);
+        const block = col.createEl('button', {
+          cls: this.eventClass(event) + (event.actualFocus ? ' is-plan' : '')
+        });
+        applyGeometry(block, event, metrics);
+        const runningRef = this.plugin.focusPlanRef;
+        const isRunningPlan = this.plugin.focusStatus === 'running'
+          && runningRef
+          && runningRef.date === event.date
+          && runningRef.rawLine === event.rawLine
+          && Number(runningRef.occurrence || 0) === Number(event.occurrence || 0);
+        block.classList.toggle('is-focus-running', !!isRunningPlan);
         block.setText(metrics.lanes > 1 ? event.title : `${this.minutesLabel(event.startMinute)} ${event.title}`);
         block.setAttribute('title', `${this.minutesLabel(event.startMinute)}–${this.minutesLabel(event.endMinute)} ${event.title}`);
+        block.addEventListener('click', (evt) => { evt.stopPropagation(); void this.openEvent(event); });
+      }
+
+      for (const event of actualTimed) {
+        const metrics = planMetrics.get(event.plan);
+        if (!metrics) continue;
+        const block = col.createEl('button', { cls: this.eventClass(event) + ' is-actual-focus' });
+        applyGeometry(block, event, metrics);
+        block.setText('');
+        block.setAttribute('title', `实际 ${this.minutesLabel(event.startMinute)}–${this.minutesLabel(event.endMinute)} · ${event.title}`);
         block.addEventListener('click', (evt) => { evt.stopPropagation(); void this.openEvent(event); });
       }
       if (isToday) {
@@ -5054,6 +5443,7 @@ class ParaRouterPlugin extends Plugin {
     this.focusStartedAt = null;
     this.focusStatus = 'idle';
     this.focusSessionStart = null;
+    this.focusPlanRef = null;
     this.stopFocusClock();
     this.settings.focusName = this.focusName;
     this.settings.focusPresetId = this.focusPresetId;
@@ -5248,6 +5638,7 @@ class ParaRouterPlugin extends Plugin {
     this.focusSegments = timer && Array.isArray(timer.segments)
       ? timer.segments.filter((segment) => segment && Number.isFinite(segment.start) && Number.isFinite(segment.end) && segment.end >= segment.start)
       : [];
+    this.focusPlanRef = timer && timer.planRef && typeof timer.planRef === 'object' ? timer.planRef : null;
     this.focusCompleting = false;
     this.focusClock = null;
     this.focusMiniEl = null;
@@ -5336,7 +5727,8 @@ class ParaRouterPlugin extends Plugin {
         startedAt: this.focusStartedAt,
         status: this.focusStatus,
         sessionStart: this.focusSessionStart,
-        segments: this.focusSegments || []
+        segments: this.focusSegments || [],
+        planRef: this.focusPlanRef || null
       };
     }
     void this.saveSettings();
@@ -5345,6 +5737,7 @@ class ParaRouterPlugin extends Plugin {
   setFocusName(name) {
     const value = String(name || '').trim().slice(0, 40) || '专注';
     if (value === this.focusName) return;
+    this.focusPlanRef = null;
     this.focusPresetId = null;
     this.settings.focusPresetId = null;
     this.focusName = value;
@@ -5387,24 +5780,28 @@ class ParaRouterPlugin extends Plugin {
     this.focusStatus = 'idle';
     this.focusSessionStart = null;
     this.focusSegments = [];
+    this.focusPlanRef = null;
     this.stopFocusClock();
     this.persistFocusTimer();
     this.hideFocusMini();
     if (emit) this.emitFocusChanged();
   }
 
-  startFocusTimer() {
+  startFocusTimer(options = {}) {
     if (this.focusStatus === 'running') return;
+    const keepPlanRef = !!(options && options.keepPlanRef);
     if (this.focusStatus === 'done') {
       this.focusBaseElapsed = 0;
       this.focusStatus = 'idle';
       this.focusSessionStart = null;
       this.focusSegments = [];
+      if (!keepPlanRef) this.focusPlanRef = null;
     }
     if (this.focusStatus === 'idle') {
       this.focusBaseElapsed = 0;
       this.focusSessionStart = Date.now();
       this.focusSegments = [];
+      if (!keepPlanRef) this.focusPlanRef = null;
     }
     this.focusStartedAt = Date.now();
     this.focusStatus = 'running';
@@ -5413,6 +5810,41 @@ class ParaRouterPlugin extends Plugin {
     this.emitFocusChanged();
     if (Platform.isDesktopApp) void this.showFocusPopout();
     else this.showFocusMini();
+  }
+
+  startFocusFromPlan(plan) {
+    if (!plan) return false;
+    if (this.focusStatus === 'running' || this.focusStatus === 'paused') {
+      new Notice('Q-Section: 先结束当前专注，再开始新的专注。');
+      return false;
+    }
+    if (this.focusStatus === 'done') this.resetFocusTimer(false);
+    const startMinute = Number.isFinite(Number(plan.startMinute)) ? Number(plan.startMinute) : 9 * 60;
+    const endMinute = Number.isFinite(Number(plan.endMinute)) ? Number(plan.endMinute) : startMinute + 25;
+    const minutes = Math.min(360, Math.max(1, Math.round((endMinute - startMinute) || 25)));
+    const startLabel = window.moment().startOf('day').add(startMinute, 'minute').format('HH:mm');
+    const endLabel = window.moment().startOf('day').add(endMinute, 'minute').format('HH:mm');
+    this.focusPresetId = null;
+    this.settings.focusPresetId = null;
+    this.focusName = String(plan.title || '专注').trim().slice(0, 40) || '专注';
+    this.focusMode = 'countdown';
+    this.focusDuration = minutes * 60;
+    this.focusPlanRef = {
+      date: plan.date,
+      rawLine: plan.rawLine,
+      occurrence: Number(plan.occurrence) || 0,
+      title: plan.title,
+      planStart: startLabel,
+      planEnd: endLabel
+    };
+    this.focusBaseElapsed = 0;
+    this.focusStartedAt = null;
+    this.focusStatus = 'idle';
+    this.focusSessionStart = null;
+    this.focusSegments = [];
+    this.stopFocusClock();
+    this.startFocusTimer({ keepPlanRef: true });
+    return true;
   }
 
   pauseFocusTimer() {
@@ -5465,8 +5897,11 @@ class ParaRouterPlugin extends Plugin {
         start,
         end,
         segments,
+        planRef: this.focusPlanRef,
         completed: !!auto
       });
+      this.focusPlanRef = null;
+      this.persistFocusTimer();
       new Notice(`Q-Section: 专注 ${this.focusMinutesLabel(record.minutes)} 已记录，并写入今日安排。`);
       this.emitFocusChanged();
       window.setTimeout(() => {
@@ -5805,7 +6240,7 @@ class ParaRouterPlugin extends Plugin {
     return `${total} 分钟`;
   }
 
-  async recordFocusSession({ mode, name, minutes, start, end, segments, completed }) {
+  async recordFocusSession({ mode, name, minutes, start, end, segments, planRef, completed }) {
     const startMoment = window.moment(start || Date.now());
     const endMoment = window.moment(end || Date.now());
     const date = startMoment.format('YYYY-MM-DD');
@@ -5823,6 +6258,7 @@ class ParaRouterPlugin extends Plugin {
       start: startMoment.toISOString(),
       end: endMoment.toISOString(),
       segments: cleanSegments,
+      planRef: planRef && planRef.planStart && planRef.planEnd ? { ...planRef } : null,
       completed: !!completed
     };
 
@@ -5932,7 +6368,7 @@ class ParaRouterPlugin extends Plugin {
     return before + section + (tailText ? '\n' + tailText : '\n');
   }
 
-  buildDailyScheduleLine({ title, allDay, start, end, location }) {
+  buildDailyScheduleLine({ title, allDay, start, end, location, event }) {
     const cleanText = (value) => String(value || '')
       .replace(/[\r\n]+/g, ' ')
       .replace(/\s+/g, ' ')
@@ -5946,6 +6382,11 @@ class ParaRouterPlugin extends Plugin {
       .trim();
     const parts = [`- ${cleanTitle}`];
     if (!allDay) parts.push(`[startTime:: ${start}]`, `[endTime:: ${end}]`);
+    if (!allDay && event && event.focusPlan
+      && Number.isFinite(event.planStartMinute) && Number.isFinite(event.planEndMinute)) {
+      const clock = (minutes) => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+      parts.push(`[focusPlan:: ${clock(event.planStartMinute)}-${clock(event.planEndMinute)}]`);
+    }
     const place = cleanField(location);
     if (place) parts.push(`[location:: ${place}]`);
     return parts.join(' ');
@@ -6040,13 +6481,16 @@ class ParaRouterPlugin extends Plugin {
     const rawSegments = Array.isArray(record.segments) && record.segments.length
       ? record.segments
       : [{ start: startMoment.valueOf(), end: endMoment.valueOf() }];
+    const planField = record.planRef && record.planRef.planStart && record.planRef.planEnd
+      ? ` [focusPlan:: ${record.planRef.planStart}-${record.planRef.planEnd}]`
+      : '';
     const lines = rawSegments
       .filter((segment) => segment && segment.end > segment.start)
       .map((segment) => {
         const segStart = window.moment(segment.start);
         const segEnd = window.moment(segment.end);
         const minutes = Math.max(1, Math.round((segment.end - segment.start) / 60000));
-        return `- ${record.name || '专注'} · ${this.focusMinutesLabel(minutes)} [startTime:: ${segStart.format('HH:mm')}] [endTime:: ${segEnd.format('HH:mm')}]`;
+        return `- ${record.name || '专注'} · ${this.focusMinutesLabel(minutes)} [startTime:: ${segStart.format('HH:mm')}] [endTime:: ${segEnd.format('HH:mm')}]${planField}`;
       });
     if (!lines.length) return;
     await this.app.vault.process(file, (text) => this.insertDailyFocusEvent(text, lines.join('\n')));

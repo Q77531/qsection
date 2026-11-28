@@ -1,7 +1,7 @@
 {
   "id": "qsection",
   "name": "Q-Section",
-  "version": "0.17.2",
+  "version": "0.17.3",
   "minAppVersion": "1.5.0",
   "description": "Q 截面 + Q 操作台 + Q 日历：Q 截面只读数据；Q 日历负责日程和倒数日；Q 操作台负责专注、打卡、速记、创作、关系推进、项目完成与领域/路由体检。Read-only Q view, Q calendar, and Q console.",
   "author": "qsection",
